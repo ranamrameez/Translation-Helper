@@ -2,6 +2,6 @@
 
 Paste your text and translate it into your desired language without worrying about the text length.
 
-## Live Link
+## Translation-Helper Live Link
 
-<https://github.com/ranamrameez/Translation-Helper/index.html>
+[https://github.com/ranamrameez/Translation-Helper/index.htm](https://ranamrameez.github.io/Translation-Helper/)l
