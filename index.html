@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Translation Helper - Bootstrap 5 Material Style</title>
+
+		<!-- Bootstrap 5 CSS -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+		<!-- Google Material Icons -->
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+		
+		<link rel="stylesheet" href="https://ranamrameez.github.io/LibrariesByRana/material-bs.css">
+		<style>
+			html,
+			body {
+				height: 100%;
+				background: #f8f8f8;
+			}
+			.flex-fill {
+				flex: 1 1 auto;
+			}
+			.displays {
+				background: #fff;
+				border-radius: 1rem;
+				padding: 20px;
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+				box-shadow: 0 0px 7px rgba(0, 0, 0, 0.1);
+				margin: 7px 0 0 0;
+			}
+			#display {
+				padding: 10px;
+				background: #f8f9fa;
+				overflow: auto;
+				flex: 1;
+			}
+
+			#display:hover {
+				cursor: pointer;
+			}
+
+			#display p:hover {
+				font-weight: bold;
+			}
+			.paste-btns {
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			.content-row {
+				flex: 1 1 auto;
+				overflow: hidden;
+			}
+			textarea.form-control {
+				flex: 1 1 auto;
+				resize: none;
+			}
+		</style>
+	</head>
+
+	<body class="d-flex flex-column h-100">
+		<!-- ✅ Bootstrap Navbar -->
+		<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+			<div class="container-fluid">
+				<a class="navbar-brand text-primary" href="./">🔗 My Tools</a>
+				<button
+					class="navbar-toggler"
+					type="button"
+					data-bs-toggle="collapse"
+					data-bs-target="#navbarNav"
+					aria-controls="navbarNav"
+					aria-expanded="false"
+					aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarNav">
+					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+						<!-- ✅ Bootstrap Dropdowns -->
+						<li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+								General Tools
+							</a>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item" href="./">Translation Helper</a></li>
+								<!-- <li><a class="dropdown-item" href="#">File Converter</a></li>
+								<li><a class="dropdown-item" href="#">Text Formatter</a></li> -->
+							</ul>
+						</li>
+
+						<!-- <li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+								GIS Tools
+							</a>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item" href="#">Coordinate Converter</a></li>
+								<li><a class="dropdown-item" href="#">Shapefile Viewer</a></li>
+								<li><a class="dropdown-item" href="#">Map Tiler</a></li>
+							</ul>
+						</li> -->
+
+						<!-- <li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+								General Tools
+							</a>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item" href="#">QR Code Generator</a></li>
+								<li><a class="dropdown-item" href="#">Unit Converter</a></li>
+								<li><a class="dropdown-item" href="#">Password Generator</a></li>
+							</ul>
+						</li> -->
+					</ul>
+
+					<!-- ✅ Info Button (in Navbar) -->
+					<button
+						type="button"
+						class="btn btn-outline-info btn-sm ripple rounded"
+						data-bs-toggle="modal"
+						data-bs-target="#infoModal"
+						title="How to Use">
+						<span class="material-icons align-middle p-0 m-0">info</span>
+					</button>
+				</div>
+			</div>
+		</nav>
+
+		<!-- ✅ Main Content -->
+		<div class="container py-2 d-flex flex-column flex-fill">
+			<div class="text-center mb-3">
+				<h1 class="text-primary">Translation Helper</h1>
+				<p class="text-muted">Use this page to translate text without worrying about text length using <em>Google Translate</em>.</p>
+			</div>
+
+			<div class="row content-row pb-3">
+				<!-- Input -->
+				<div class="col-md-4 mb-3 mb-md-0 d-flex flex-column">
+					<div class="displays flex-fill">
+						<h3 class="text-primary">Input Text</h3>
+
+						<div class="paste-btns mb-2 d-flex justify-content-between">
+							<button id="pasteBtn" class="btn btn-sm btn-primary ripple" title="Paste">
+								<span class="material-icons align-middle">content_paste</span> Paste
+							</button>
+							<button id="pasteEndBtn" class="btn btn-sm btn-secondary ripple" title="Extend Paste">
+								<span class="material-icons align-middle">add_circle_outline</span> Extend
+							</button>
+							<button id="clearBtn" class="btn btn-sm btn-danger ripple" title="Clear Text">
+								<span class="material-icons align-middle">clear</span> Clear
+							</button>
+							<button
+								id="translateBtn"
+								class="btn btn-sm btn-success ripple"
+								data-bs-toggle="modal"
+								data-bs-target="#infoModal"
+								title="Translate">
+								<span class="material-icons align-middle">public</span> Translate
+							</button>
+						</div>
+
+						<textarea id="input" rows="7" class="form-control"></textarea>
+					</div>
+				</div>
+
+				<!-- Display -->
+				<div class="col-md-8 d-flex flex-column">
+					<div class="displays flex-fill">
+						<div class="d-flex justify-content-between align-items-center">
+							<h3 class="text-primary">Display | Translation</h3>
+							<button id="copyBtn" class="btn btn-outline-primary btn-sm ripple" title="Copy Text">
+								<span class="material-icons align-middle">content_copy</span> Copy
+							</button>
+						</div>
+						<p class="text-muted">This area will display the input text.</p>
+						<div id="display"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ✅ Bootstrap Modal -->
+		<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header border-0">
+						<h5 class="modal-title" id="infoModalLabel">
+							<span class="material-icons align-middle p-0 m-0">info</span> How to Use
+						</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<ul>
+							<li>Type or paste in the input box.</li>
+							<li>The text will be displayed in the Display area as you type.</li>
+							<li>
+								<em><b> Use your browser’s Right-Click → Translate to translate this page.</b></em>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Bootstrap 5 JS with Popper included -->
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+		<!-- Translation JS -->
+		<script>
+			const input = document.getElementById("input");
+			const displayElement = document.getElementById("display");
+			const Configs = {
+				// isCopyingAllowed: false,
+			};
+
+			function updateDisplay() {
+				const inputText = input.value.trim();
+				displayElement.innerHTML = "";
+				if (!inputText) {
+					displayElement.innerHTML = "<p class='text-muted'>No text to display.</p>";
+					return;
+				}
+				inputText.split("\n").forEach((line) => {
+					const p = document.createElement("p");
+					p.textContent = line;
+					displayElement.appendChild(p);
+				});
+			}
+
+			input.addEventListener("input", updateDisplay);
+
+			document.getElementById("pasteBtn").addEventListener("click", async () => {
+				try {
+					const text = await navigator.clipboard.readText();
+					input.value = text;
+					input.dispatchEvent(new Event("input"));
+				} catch (err) {
+					alert("Failed to paste: " + err);
+				}
+			});
+
+			document.getElementById("pasteEndBtn").addEventListener("click", async () => {
+				try {
+					const text = await navigator.clipboard.readText();
+					input.value += (input.value ? "\n" : "") + text;
+					input.dispatchEvent(new Event("input"));
+				} catch (err) {
+					alert("Failed to paste: " + err);
+				}
+			});
+			document.getElementById("clearBtn").addEventListener("click", () => {
+				input.value = "";
+				updateDisplay();
+			});
+
+			// Copy to Clipboard function
+			// This function copies the text from the display area to the clipboard
+			const copyToClipboard = async () => {
+				try {
+					let textToCopy = "";
+					displayElement.querySelectorAll("p").forEach((p) => {
+						textToCopy += p.textContent + "\n";
+					});
+					if (!textToCopy.trim()) {
+						alert("Nothing to copy!");
+						return;
+					}
+					await navigator.clipboard.writeText(textToCopy.trim());
+					alert("Copied to clipboard!");
+				} catch (err) {
+					alert("Failed to copy: " + err);
+				}
+			};
+
+			// Attach event listeners
+			document.getElementById("copyBtn").addEventListener("click", copyToClipboard);
+			document.getElementById("display").addEventListener("click", copyToClipboard);
+
+			// document.getElementById("translateBtn").addEventListener("click", () => {
+			// 	alert("Use your browser's Right-Click → Translate to translate this page.");
+			// });
+		</script>
+	</body>
+</html>
