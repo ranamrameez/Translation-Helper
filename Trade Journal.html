@@ -55,6 +55,7 @@ th{font-weight:600;color:var(--mut);font-size:13px}
 [hidden]{display:none}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="./ahl-journal.js"></script>
 </head>
 <body>
 <button id="mb" class="btn" aria-label="Menu">Menu</button>
@@ -67,8 +68,8 @@ th{font-weight:600;color:var(--mut);font-size:13px}
 <a class="k" href="#qse-import" data-v="qse-import">Statement and history</a>
 <a class="p" href="#psx" data-v="psx">PSX - Al Habib</a>
 <a class="k" href="#psx-prices" data-v="psx-prices">Prices and break-even</a>
-<a class="k" href="#psx-report" data-v="psx-report">Report</a>
-<a class="k" href="#psx-import" data-v="psx-import">Statement and history</a>
+<a class="k" href="#psx-report" data-v="psx-report">Dashboard &amp; P&amp;L</a>
+<a class="k" href="#psx-import" data-v="psx-import">Import &amp; reconcile</a>
 </nav>
 <main>
 <h1>Trade Journal</h1>
@@ -413,7 +414,15 @@ function refresh(){
   let L=R.led,O=R.ord,ext=0;const est=!R.led;
   if(est)L=ledFromOrd(R.ord);else{if(T.led&&!T.ord)O=null;if(O){const ld=L.tx.reduce((m,t)=>key(t.d)>m?key(t.d):m,""),x=ledFromOrd(O.filter(o=>key(o.d)>=ld));ext=x.tx.length>0;L={...L,tx:[...L.tx,...x.tx]}}}
   S.ps=analysePs(L,O);S.ps.est=est;S.ps.ext=ext;
-  ["qa","ps"].forEach(ex=>{render(S[ex]);board(ex)});imports();document.querySelectorAll("[data-day]").forEach(b=>{b.style.outline=b.dataset.day===DAYB?"2px solid var(--acc)":""});
+  ["qa","ps"].forEach(ex=>{render(S[ex]);board(ex)});imports();renderAHLOverview();document.querySelectorAll("[data-day]").forEach(b=>{b.style.outline=b.dataset.day===DAYB?"2px solid var(--acc)":""});
+}
+function renderAHLOverview(){
+  const host=$("#rp-ps");if(!host||!window.AHLJournal)return;
+  const r=AHLJournal.calculate(R.led,R.ord),cur=host.innerHTML;
+  const info=R.led&&T.led?"Imported AHL statement":"Sample / estimated ledger — import your statement to verify P&L";
+  const status=r.matched?"Matched":r.mismatches.length+" quantity mismatches · "+r.issues.length+" accounting warnings";
+  const table=r.open.map(p=>'<tr><td>'+esc(p.u)+'</td><td>'+fmt(p.q)+'</td><td>'+fmt(p.avgCost,2)+'</td><td>'+fmt(p.cost,2)+'</td></tr>').join("");
+  host.innerHTML='<div class="card"><h2 style="margin-top:0">AHL at a glance</h2><p class="mut">'+esc(info)+'</p><div class="grid"><div><span class="mut">Realized P&amp;L</span><h2 class="'+cl(r.realized)+'">'+sg(r.realized)+' PKR</h2></div><div><span class="mut">Reconciliation</span><h2>'+esc(status)+'</h2></div><div><span class="mut">Open positions</span><h2>'+r.open.length+'</h2></div><div><span class="mut">Duplicate ledger rows</span><h2>'+r.duplicates+'</h2></div></div><p class="note">Weighted-average cost including purchase charges. Unmatched sells are excluded and flagged. Same-day differences are realized cash adjustments. Reconciliation is a quantity check, not a verified cash-balance audit.</p><h3>Open positions</h3><div class="scroll"><table><tr><th>Symbol</th><th>Shares</th><th>Average cost</th><th>Total cost</th></tr>'+table+'</table></div>'+((r.mismatches.length||r.issues.length)?'<details><summary>Review discrepancies</summary><pre style="white-space:pre-wrap">'+esc(JSON.stringify({mismatches:r.mismatches,issues:r.issues},null,2))+'</pre></details>':'')+'</div><details style="margin-top:16px"><summary>Advanced reports and charts</summary>'+cur+'</details>';
 }
 function board(ex){
   const a=S[ex],H=store(),PT=lsGet("tj.ptime",{}),el=$("#bd-"+ex);
