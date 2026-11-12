@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trade Journal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#eef1f4;--card:#fff;--ink:#14202b;--mut:#5d6b78;--line:#d9dfe5;--pos:#17783f;--neg:#b8372f;--acc:#0f6670;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1418;--card:#171e24;--ink:#e6ecf1;--mut:#93a1ad;--line:#27313a;--pos:#4cc07a;--neg:#ef7a70;--acc:#5bc0cc;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1418;--card:#171e24;--ink:#e6ecf1;--mut:#93a1ad;--line:#27313a;--pos:#4cc07a;--neg:#ef7a70;--acc:#5bc0cc;color-scheme:dark}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:760px;margin:0 auto;padding:56px 16px 48px}
+#nav{position:fixed;inset:0 auto 0 0;width:250px;background:var(--card);border-right:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top,0px)) 12px 16px;overflow-y:auto;transform:translateX(-100%);transition:transform .2s;z-index:20}
+#nav.open{transform:none}
+#nav a{display:block;padding:7px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:14px}
+#nav a.k{padding-left:24px;color:var(--mut)}
+#nav a.p{font-weight:700;margin-top:12px}
+#nav a.on{background:var(--bg);color:var(--acc)}
+#mb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:8px;z-index:21;margin:0}
+@media (min-width:900px){#nav{transform:none}#mb{display:none}main{margin:0 0 0 250px;max-width:920px;padding-top:20px}}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;margin:8px 0}
+.pill{font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mut);white-space:nowrap}.pill.ok{border-color:var(--pos);color:var(--pos)}
+h3{font-size:15px;margin:18px 0 6px}
+.mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}.lt.off{opacity:.35}
+.chw{position:relative}.tip{position:absolute;top:8px;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.2);min-width:170px;z-index:5}.tip dl{display:grid;grid-template-columns:1fr auto;gap:2px 12px;margin:4px 0 0}.tip dt{color:var(--mut)}.tip dd{margin:0;text-align:right}
+.lg{margin-bottom:6px}.lg span{display:inline-flex;align-items:center;gap:5px;margin-right:12px;font-size:12px;color:var(--mut)}.lg i{width:14px;height:4px;border-radius:2px;display:inline-block}
+.days{display:flex;flex-wrap:wrap;gap:10px}.dc{width:190px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}.dc b{display:block;margin-bottom:4px}.dc dl{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin:0;font-size:13px}.dc dt{color:var(--mut)}.dc dd{margin:0;text-align:right}
+h1{font-size:26px;line-height:1.15;margin:8px 0 6px;letter-spacing:-.01em}
+h2{font-size:17px;margin:28px 0 10px}
+p{margin:0 0 10px}
+.mut{color:var(--mut);font-size:13px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.drop{display:block;border:2px dashed var(--line);border-radius:14px;padding:26px 16px;text-align:center;background:var(--card);cursor:pointer;margin-top:14px}
+.drop:hover,.drop.on{border-color:var(--acc)}
+.drop input{display:none}
+.drop b{display:block;font-size:16px;margin-bottom:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.hero{padding:18px 16px 8px}
+.big{font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.grid .card b{display:block;font-size:20px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--mut);font-size:13px}
+.err{background:var(--card);border:1px solid var(--neg);border-radius:12px;padding:12px;margin-top:14px;color:var(--neg)}
+.note{font-size:13px;color:var(--mut);border-left:3px solid var(--line);padding-left:10px;margin-top:12px}
+#out input{width:84px;padding:6px 8px;text-align:right;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+#cp td,#cp th{white-space:normal}
+.sec{font-size:22px;margin:34px 0 4px;padding-top:12px;border-top:2px solid var(--acc)}.upd{font-size:13px;color:var(--mut);margin:0 0 10px}.tabs{display:flex;gap:8px;margin:16px 0 4px}.tabs button{flex:1;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;cursor:pointer}.tabs button.on{border-color:var(--acc);color:var(--acc);font-weight:600}.btn{padding:8px 14px;border:0;border-radius:10px;background:var(--acc);color:var(--bg);font:inherit;cursor:pointer;margin:8px 0}#out input[type=date]{width:auto}#pp,#paste,.mk,#pa-led,#pa-ord{display:block;width:100%;margin-top:8px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;font-family:inherit}
+[data-p]{scroll-margin-top:56px}
+[hidden]{display:none}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<button id="mb" class="btn" aria-label="Menu">Menu</button>
+<nav id="nav"><b>Trade Journal</b>
+<a href="#overview" data-v="overview">Top of page</a>
+<a class="p" href="#qse" data-v="qse">QSE - The Group</a>
+<a class="k" href="#qse-prices" data-v="qse-prices">Prices and break-even</a>
+<a class="k" href="#qse-report" data-v="qse-report">Report</a>
+<a class="k" href="#qse-import" data-v="qse-import">Statement and history</a>
+<a class="p" href="#psx" data-v="psx">PSX - Al Habib</a>
+<a class="k" href="#psx-prices" data-v="psx-prices">Prices and break-even</a>
+<a class="k" href="#psx-report" data-v="psx-report">Report</a>
+<a class="k" href="#psx-import" data-v="psx-import">Statement and history</a>
+</nav>
+<main>
+<h1>Trade Journal</h1>
+<p class="mut">Everything is calculated in this page. Nothing is uploaded, and your data stays in this browser.</p>
+<label class="drop" id="drop"><input type="file" id="file" multiple accept=".xlsx,.xls,.csv,.html,.htm,.txt"><b>Choose a statement</b><span class="mut">or drop it here. Use the longest date range you have.</span></label>
+<details style="margin-top:10px"><summary class="mut">Paste statement or order history (markup or CSV)</summary><textarea id="paste" rows="6" placeholder="Paste the table markup or CSV here"></textarea><button class="btn" id="go">Read pasted text</button></details>
+<div id="err" class="err" hidden></div>
+<div id="out"><section><div data-p="qse-prices"><h2 class="sec">QSE - The Group · Prices and break-even</h2><div id="bd-qa"></div></div>
+<div data-p="qse-report"><h2 class="sec">QSE - The Group · Report</h2><div id="rp-qa"></div></div>
+<div data-p="qse-import"><h2 class="sec">QSE - The Group · Statement and history</h2><p class="note" style="margin-top:0"><b>Loading replaces.</b> A new Qatar statement replaces the current one completely, and the page keeps no older copy. Load the longest date range you have so earlier days stay in. Prices you saved are never touched.</p><div id="qa-slot"></div><div id="im-qa"></div></div></section>
+<section><div data-p="psx-prices"><h2 class="sec">PSX - Al Habib · Prices and break-even</h2><div id="bd-ps"></div></div>
+<div data-p="psx-report"><h2 class="sec">PSX - Al Habib · Report</h2><div id="rp-ps"></div></div>
+<div data-p="psx-import"><h2 class="sec">PSX - Al Habib · Statement and history</h2><p class="note" style="margin-top:0"><b>Pasting replaces.</b> Each box replaces its own data completely: a new account statement replaces the previous account statement, and a new order history replaces the previous order history. Paste the full table each time so earlier days stay in. Prices you saved are never touched.</p>
+<div class="card"><b>Account statement</b> <span class="mut">(date, description, debit, credit, balance)</span><textarea id="pa-led" rows="5" placeholder="Paste the account statement table markup or CSV"></textarea><button class="btn" id="go-led">Replace from pasted text</button> <label class="btn">Replace from CSV or Excel file<input type="file" id="fl-led" accept=".csv,.xlsx,.xls,.html,.htm,.txt" style="display:none"></label></div>
+<div class="card" style="margin-top:10px"><b>Order history</b> <span class="mut">(scrip, quantity, gross rate, net amount, type, dates)</span><textarea id="pa-ord" rows="5" placeholder="Paste the order history table markup or CSV"></textarea><button class="btn" id="go-ord">Replace from pasted text</button> <label class="btn">Replace from CSV or Excel file<input type="file" id="fl-ord" accept=".csv,.xlsx,.xls,.html,.htm,.txt" style="display:none"></label></div>
+<div class="card" style="margin-top:10px"><b>Show days by</b> <span class="mut">Your broker’s statement dates a trade the next business day (T+1). Statement date matches the lines you see at the broker, so the newest line shows as the latest day. Trade date books each trade on the day you made it.</span><br><button class="btn" data-day="stmt">Statement date</button> <button class="btn" data-day="exec">Trade date</button></div>
+<p id="pmsg" class="note"></p><div id="im-ps"></div></div></section>
+<details style="margin-top:24px"><summary class="mut">Fee settings</summary><p><label>Qatar per side % <input id="fq"></label> <label>PSX commission % <input id="fc"></label> <label>PSX tax on commission % <input id="fs"></label> <label>PSX CDC per share <input id="fd"></label></p></details></div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const fmt=(n,d=0)=>(n<0&&Math.round(Math.abs(n)*10**d)>0?"−":"")+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const sg=n=>(n>0.5?"+":"")+fmt(n);
+const cl=n=>n>0.5?"pos":n<-0.5?"neg":"";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const key=d=>{const p=d.split("/");return p[2]+p[1]+p[0]};
+
+function parse(rows){
+  const i=rows.findIndex(r=>r&&r[0]==="Date");
+  if(i<0)throw new Error("I couldn’t find the Date, Type, Count header row. Check that this is an account statement from your broker.");
+  const tr=[],rw={},dep={};let cur=null;
+  for(const r of rows.slice(i+1)){
+    const d=r[0],t=r[1];
+    if(typeof d==="string"&&/^\d\d\/\d\d\/\d{4}$/.test(d)){
+      if(t==="Buy"||t==="Sell"){cur={d,t,q:num(r[2]),u:String(r[3]),p:num(r[4]),net:num(r[5]),fee:0};tr.push(cur)}
+      else{cur=null;if(/reward/i.test(t||""))rw[d]=(rw[d]||0)+num(r[5]);else if(/swift|transfer|deposit/i.test(t||""))dep[d]=(dep[d]||0)+num(r[5])}
+    }else if(!d&&t==="Commission"&&cur){cur.fee+=Math.abs(num(r[5]))}
+  }
+  if(!tr.length)throw new Error("The file has no Buy or Sell rows.");
+  return{tr,rw,dep};
+}
+
+function analyse({tr,rw,dep}){
+  const qty={},cost={},days={},stock={};
+  const D=d=>days[d]||(days[d]={d,real:0,fees:0,n:0,turn:0,rw:rw[d]||0,cash:{},dq:{},last:{}});
+  Object.keys(rw).forEach(D);
+  for(const t of tr){
+    const x=D(t.d),u=t.u;
+    x.n++;x.fees+=t.fee;x.turn+=Math.abs(t.net);
+    x.cash[u]=(x.cash[u]||0)+t.net;
+    x.dq[u]=(x.dq[u]||0)+(t.t==="Buy"?t.q:-t.q);
+    x.last[u]=t.p;const z=(x.rt||(x.rt={}))[u]||(x.rt[u]={bq:0,bn:0,sq:0,sn:0});if(t.t==="Buy"){z.bq+=t.q;z.bn-=t.net}else{z.sq+=t.q;z.sn+=t.net}
+    if(t.t==="Buy"){qty[u]=(qty[u]||0)+t.q;cost[u]=(cost[u]||0)-t.net}
+    else{
+      const a=qty[u]>0?cost[u]/qty[u]:0,r=t.net-a*t.q;
+      x.real+=r;(x.st||(x.st={}))[u]=(x.st[u]||0)+r;stock[u]=(stock[u]||0)+r;cost[u]-=a*t.q;qty[u]-=t.q;
+    }
+  }
+  const list=Object.values(days).sort((a,b)=>key(a.d)<key(b.d)?-1:1);
+  for(const x of list){x.dn=0;for(const u in x.cash)x.dn+=x.cash[u]+x.dq[u]*x.last[u];x.rtp=0;x.rtq=0;for(const u in x.rt){const z=x.rt[u],m=Math.min(z.bq,z.sq);if(m>0){x.rtp+=m*(z.sn/z.sq-z.bn/z.bq);x.rtq+=m}}}
+  const sum=f=>list.reduce((s,x)=>s+f(x),0);
+  const turn=sum(x=>x.turn),fees=sum(x=>x.fees),rate=turn?fees/turn:0;
+  const open=Object.keys(qty).filter(u=>qty[u]>0.5).map(u=>{const a=cost[u]/qty[u];return{u,q:qty[u],a,be:a/(1-rate)}});
+  return{ev:tr.map(t=>({d:t.d,u:t.u,dq:t.t==="Buy"?t.q:-t.q,cash:t.net,p:t.p})),fl:[...Object.entries(rw).map(([d,v])=>({d,v})),...Object.entries(dep||{}).map(([d,v])=>({d,v}))],list,qty,r2:(f=>f.reduce((s,t)=>s+t.fee,0)/Math.max(1,f.reduce((s,t)=>s+Math.abs(t.net),0)))(tr.filter(t=>Math.abs(t.net)>=1000)),stock,open,rate,real:sum(x=>x.real),fees,turn,n:sum(x=>x.n),rw:sum(x=>x.rw),dn:sum(x=>x.dn),rtp:sum(x=>x.rtp),rtq:sum(x=>x.rtq),
+    win:list.filter(x=>x.real>0.5).length,lose:list.filter(x=>x.real<-0.5).length,trading:list.filter(x=>x.n).length};
+}
+
+function chart(list){
+  const step=26,w=Math.max(list.length*step,300),h=170,mid=h/2,m=Math.max(1,...list.map(x=>Math.abs(x.real)));
+  let s=`<svg viewBox="0 0 ${w} ${h+16}" width="${w}" height="${h+16}" role="img" aria-label="Daily realised profit and loss"><line x1="0" x2="${w}" y1="${mid}" y2="${mid}" stroke="var(--line)"/>`;
+  list.forEach((x,i)=>{
+    const bh=Math.max(Math.abs(x.real)/m*(mid-14),1),cx=i*step+step/2,y=x.real>=0?mid-bh:mid;
+    s+=`<rect x="${cx-8}" y="${y}" width="16" height="${bh}" rx="2" fill="var(${x.real>=0?"--pos":"--neg"})"><title>${x.d}: ${sg(x.real)}</title></rect>`;
+    if(i%3===0)s+=`<text x="${cx}" y="${h+12}" font-size="9" text-anchor="middle" fill="var(--mut)">${x.d.slice(0,5)}</text>`;
+  });
+  return s+"</svg>";
+}
+
+function render(a){
+  const L=a.list,last=L[L.length-1];
+  const st=Object.entries(a.stock).sort((p,q)=>p[1]-q[1]);
+  $("#rp-"+a.ex).innerHTML=`
+  <div class="card hero"><div class="mut">Realised result, ${L[0].d} to ${last.d}, after fees</div>
+    <div class="big ${cl(a.real)}">${sg(a.real)} QAR</div>
+    <div class="scroll" style="margin-top:12px">${chart(L)}</div>
+    <div class="mut" style="margin:4px 0 8px">Each bar is one day’s closed trades.</div></div>
+  <div class="grid">
+    <div class="card"><span class="mut">Fees paid</span><b>${fmt(a.fees)}</b><span class="mut">${(a.rate*100).toFixed(2)}% of turnover</span></div>
+    <div class="card"><span class="mut">Trades</span><b>${fmt(a.n)}</b><span class="mut">turnover ${fmt(a.turn)}</span></div>
+    <div class="card"><span class="mut">Winning days</span><b>${a.win} of ${a.trading}</b><span class="mut">${a.lose} losing days</span></div>
+    <div class="card"><span class="mut">${a.ps?"One-time account fees":"Rewards received"}</span><span class="mut">not in the result above</span></div>
+    <div class="card"><span class="mut">Same-day profit</span><b class="${cl(a.rtp)}">${sg(a.rtp)}</b><span class="mut">${fmt(a.rtq)} shares matched</span></div>
+    <div class="card"><span class="mut">Same-day profit per share</span><b class="${cl(a.rtp)}">${a.rtq?(a.rtp>0?"+":a.rtp<0?"−":"")+Math.abs(a.rtp/a.rtq).toFixed(4):"–"}</b><span class="mut">after fees</span></div>
+  </div>
+  <h2>Trend</h2>
+  <div class="card" id="tr-${a.ex}">${trend(a)}</div>
+  <h2>Profit and loss by day and ticker</h2>
+  <div class="card" id="pl-${a.ex}"></div>
+  <h3>Each ticker on its own</h3>
+  <div class="mini" id="pm-${a.ex}"></div>
+  <h2>Latest day, ${last.d}</h2>
+  <div class="card"><table><tr><td>Closed trades, after fees</td><td class="${cl(last.real)}">${sg(last.real)}</td></tr>
+  <tr><td>Fees on ${last.n} trades</td><td>${fmt(last.fees)}</td></tr>
+  <tr><td>Trading reward</td><td>${sg(last.rw)}</td></tr>
+  ${pair(a)}</table>
+  <p class="note">“If you hadn’t traded” is what the day would have given if you had only held the shares you started with. The gap between your result and that is what your trades added or cost. It values shares at each stock’s last traded price that day, so it isolates your decisions from market moves.</p></div>
+  ${a.ps?"":`<h2>Net worth check, with official closes</h2>
+  <div class="card" id="cp"></div>`}
+  <h2>By stock</h2>
+  <div class="card scroll"><table><tr><th>Stock</th><th>Realised</th></tr>${st.map(([u,v])=>`<tr><td>${esc(u)}</td><td class="${cl(v)}">${sg(v)}</td></tr>`).join("")}</table></div>
+  
+  ${a.ps?"":`<h2>Same amount in each stock</h2>
+  <div class="card scroll" id="eq"></div>`}
+  <h2>Every day</h2>
+  <div class="days">
+  ${[...L].reverse().map(x=>`<div class="dc"><b>${x.d}</b><dl><dt>Trades</dt><dd>${x.n}</dd><dt>Fees</dt><dd>${fmt(x.fees)}</dd><dt>Closed</dt><dd class="${cl(x.real)}">${sg(x.real)}</dd><dt>Same-day profit</dt><dd class="${cl(x.rtp)}">${sg(x.rtp)}</dd><dt>Per share</dt><dd class="${cl(x.rtp)}">${x.rtq?(x.rtp>0?"+":x.rtp<0?"−":"")+Math.abs(x.rtp/x.rtq).toFixed(4):"–"}</dd>${dayPair(a,x.d)}</dl></div>`).join("")}</div>
+  <p class="note">Cost is a running average per stock, with fees included. Results use your statement only, so shares bought before its start date have no cost on record. Not financial advice.</p>`;
+  trendInit(a);plInit(a);if(!a.ps){closes(a);equal(a)}
+}
+
+const SNAP={"01/11/2026":{"rayyan b":[1.816,1.9],"qib":[19.99,21.3],"qatar fuel":[12.6,13.3],"lesha bank":[2.771,2.815],"industries qatar":[8.82,9.52],"al meera":[12.4,12.78],"qetf":[8.693,8.999],"gwc":[2.351,2.429],"mesaied":[0.865,0.91]}};
+const SNAP7={"01/11/2026":{"rayyan b":[1.644,1.9],"qib":[18.56,21.3],"qatar fuel":[12,13.3],"industries qatar":[8.45,9.52],"mesaied":[0.849,0.91],"lesha bank":[2.788,2.815]}};
+function equal(a){
+  const us=[...new Set([...Object.keys(a.stock),...a.open.map(o=>o.u)])],x=a.list[a.list.length-1],m=SNAP7[x.d]||{};
+  const sp=n=>(n>0?"+":"")+fmt(n,2)+"%";
+  $("#eq").innerHTML=`<p class="mut">Put the same amount in every stock, buy at the start price, sell at the end price, and pay fees both ways. Start prices are the closes 7 days before ${x.d}; type your own for other windows.</p>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px"><label>Amount each <input id="eqa" value="1000" inputmode="decimal"></label><label>Fee per side, % <input id="eqf" value="${(a.r2*100).toFixed(3)}" inputmode="decimal"></label></div>
+  <table><tr><th>Stock</th><th>Start</th><th>End</th><th>Gross</th><th>After fees</th><th>Profit</th><th>Break-even</th></tr>${us.map((u,i)=>{const r=m[u.toLowerCase()]||["",""];return`<tr><td>${esc(u)}</td><td><input value="${r[0]}" inputmode="decimal" aria-label="${esc(u)} start price"></td><td><input value="${r[1]}" inputmode="decimal" aria-label="${esc(u)} end price"></td><td id="eqg${i}">–</td><td id="eqn${i}">–</td><td id="eqp${i}">–</td><td id="eqb${i}">–</td></tr>`}).join("")}<tr><td><b>All together</b></td><td></td><td></td><td></td><td id="eqtn">–</td><td id="eqtp">–</td><td></td></tr></table><div id="eqx" class="note"></div>`;
+  const calc=()=>{
+    const A=parseFloat($("#eqa").value),r=parseFloat($("#eqf").value)/100,ins=[...document.querySelectorAll("#eq table input")];let tv=0,ta=0;
+    us.forEach((u,i)=>{
+      const p=parseFloat(ins[i*2].value),c=parseFloat(ins[i*2+1].value),[g,n,pr,b]=["g","n","p","b"].map(k=>$("#eq"+k+i));
+      if(A>0&&r>=0&&p>0&&c>0){
+        const v=A/(1+r)*(c/p)*(1-r),nn=(v/A-1)*100;tv+=v;ta+=A;
+        g.textContent=sp((c/p-1)*100);n.textContent=sp(nn);pr.textContent=sg(v-A);b.textContent=(p*(1+r)/(1-r)).toFixed(3);
+        n.className=pr.className=cl(nn);
+      }else{g.textContent=n.textContent=pr.textContent=b.textContent="–";n.className=pr.className=""}
+    });
+    $("#eqtn").textContent=ta?sp((tv/ta-1)*100):"–";$("#eqtp").textContent=ta?sg(tv-ta):"–";
+    $("#eqtn").className=$("#eqtp").className=ta?cl(tv-ta):"";
+    $("#eqx").textContent=r>=0?"Each stock has to rise about "+fmt(((1+r)/(1-r)-1)*100,2)+"% just to cover fees. The amount includes the buy fee.":"";
+  };
+  $("#eq").addEventListener("input",calc);calc();
+}
+
+let upCalc=()=>{};
+function unreal(a){
+  const box=$("#up");
+  if(!a.open.length){box.innerHTML=`<p class="mut">No open positions.</p>`;upCalc=()=>{};return}
+  box.innerHTML=`<table><tr><th>Stock</th><th>Shares</th><th>Avg cost</th><th>Price now</th><th>Unrealised</th><th>%</th><th>Break-even</th></tr>${a.open.map((o,i)=>`<tr><td>${esc(o.u)}</td><td>${fmt(o.q)}</td><td>${o.a.toFixed(3)}</td><td><input data-u="${esc(o.u)}" inputmode="decimal" aria-label="${esc(o.u)} price now"></td><td id="ur${i}">–</td><td id="pc${i}">–</td><td>${beSell(a.ex,o.a).toFixed(3)}</td></tr>`).join("")}<tr><td><b>Total</b></td><td></td><td></td><td></td><td id="urt">–</td><td></td><td></td></tr></table>
+  <p class="note">These shares are not part of the realised result above. Unrealised is what you would make or lose by selling at the price shown, after buy and sell fees, and it moves with the market until you sell. Average cost includes buy fees; break-even adds the sell fee at your average fee rate.</p>`;
+  upCalc=()=>{
+    const ins=[...box.querySelectorAll("input")];let tot=0,n=0;
+    a.open.forEach((o,i)=>{
+      const p=parseFloat(ins[i].value),ur=$("#ur"+i),pc=$("#pc"+i);
+      if(p>0){const u=o.q*(sellNet(a.ex,p)-o.a);tot+=u;n++;ur.textContent=sg(u);pc.textContent=(u/(o.q*o.a)*100).toFixed(2)+"%";ur.className=pc.className=cl(u)}
+      else{ur.textContent=pc.textContent="–";ur.className=pc.className=""}
+    });
+    const t=$("#urt");t.textContent=n?sg(tot)+(n<a.open.length?" (partial)":""):"–";t.className=n?cl(tot):"";
+  };
+  box.addEventListener("input",()=>upCalc());
+  box.querySelectorAll("input").forEach(inp=>{const p=lastPrice(a.ex,inp.dataset.u);if(p)inp.value=p});upCalc();
+}
+
+function closes(a){
+  const x=a.list[a.list.length-1];
+  const us=[...new Set([...Object.keys(x.cash),...Object.keys(a.qty).filter(u=>a.qty[u]>0.5)])];
+  const q1=u=>a.qty[u]||0,q0=u=>q1(u)-(x.dq[u]||0);
+  $("#cp").innerHTML=`<p class="mut">Type each stock’s previous close and close for ${x.d} from your broker’s market screen. This replaces the last-traded-price estimate.</p>
+  <table><tr><th>Stock</th><th>Prev close</th><th>Close</th></tr>${us.map(u=>`<tr><td>${esc(u)}</td><td><input inputmode="decimal" aria-label="${esc(u)} previous close"></td><td><input inputmode="decimal" aria-label="${esc(u)} close"></td></tr>`).join("")}</table><div id="cpo" style="margin-top:12px"></div><details style="margin-top:10px"><summary class="mut">Paste your broker’s market table (fills prev close and close)</summary><p class="mut">On your Qatar broker’s market prices page, select the table rows you want (the columns run Symbol, Company Name, Offer Shares, Offer Price, Close Price, Bid Price, and on to Prev Close, High and Low), copy them, and paste here. For each stock whose company name matches, it reads the Close Price and Prev Close and overwrites the numbers in the boxes above.</p><textarea id="pp" rows="5" placeholder="Paste the copied market table rows here"></textarea></details>`;
+  const calc=()=>{
+    const v=[...document.querySelectorAll("#cp input")];let ok=true,mk=0,tr=0;
+    us.forEach((u,i)=>{
+      const p=parseFloat(v[i*2].value),c=parseFloat(v[i*2+1].value);
+      if(!(p>0&&c>0)){ok=false;return}
+      mk+=q0(u)*(c-p);tr+=(x.cash[u]||0)+(q1(u)-q0(u))*c;
+    });
+    const nw=mk+tr+x.rw;
+    $("#cpo").innerHTML=ok?`<table><tr><td>If you hadn’t traded: market move on shares you held at the start</td><td class="${cl(mk)}">${sg(mk)}</td></tr>
+    <tr><td>What your trades added or cost</td><td class="${cl(tr)}">${sg(tr)}</td></tr>
+    <tr><td>Trading reward</td><td>${sg(x.rw)}</td></tr>
+    <tr><td><b>Net worth change on the day</b></td><td class="${cl(nw)}"><b>${sg(nw)}</b></td></tr></table>
+    <p class="note">Deposits and withdrawals are left out. Shares are valued at the closes you typed.</p>`:`<p class="mut">Fill in every price to see the result.</p>`;
+  };
+  const sync=()=>{
+    const v=[...document.querySelectorAll("#cp input")];
+    document.querySelectorAll("#up input").forEach(inp=>{const j=us.indexOf(inp.dataset.u);if(j>=0){const c=parseFloat(v[j*2+1].value);if(c>0)inp.value=c}});
+    upCalc();
+  };
+  $("#cp").addEventListener("input",e=>{if(e.target.id!=="pp"){calc();sync()}});
+  const fill=m=>{
+    const v=[...document.querySelectorAll("#cp input")];
+    us.forEach((u,i)=>{const r=m[u.toLowerCase()];if(r){v[i*2].value=r[0];v[i*2+1].value=r[1]}});
+    calc();sync();
+  };
+  const fromPaste=t=>{
+    const m={};
+    t.split(/\n/).forEach(l=>{
+      const n=(l.match(/\d[\d,]*\.?\d*/g)||[]).map(s=>parseFloat(s.replace(/,/g,""))),low=l.toLowerCase();
+      us.forEach(u=>{if(n.length>=10&&low.includes(u.toLowerCase()))m[u.toLowerCase()]=[n[9],n[2]]});
+    });
+    return m;
+  };
+  $("#pp").addEventListener("input",e=>fill(fromPaste(e.target.value)));
+  fill(SNAP[x.d]||{});
+}
+
+const R={qa:null,led:null,ord:null},S={qa:null,ps:null,ex:"qa"};
+const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+const num=v=>{const x=parseFloat(String(v==null?"":v).replace(/[^0-9.\-]/g,""));return isNaN(x)?0:x};
+const p2=n=>String(n).padStart(2,"0");
+function pd(s){if(typeof s==="number"&&s>20000&&s<80000){const d=new Date(Math.round((s-25569)*864e5));return p2(d.getUTCDate())+"/"+p2(d.getUTCMonth()+1)+"/"+d.getUTCFullYear()}s=String(s||"").trim();let m=s.match(/^([A-Za-z]{3})\w*\s+(\d{1,2}),?\s*(\d{4})/);if(m)return p2(m[2])+"/"+p2(MON[m[1].toLowerCase()])+"/"+m[3];m=s.match(/^(\d{4})-(\d\d)-(\d\d)/);if(m)return m[3]+"/"+m[2]+"/"+m[1];m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);return m?p2(m[1])+"/"+p2(m[2])+"/"+m[3]:s}
+function lsGet(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+const F=Object.assign({q:0.275,c:0.15,s:15,d:0.005},lsGet("tj.fees",{}));
+const SEED={qa:{d:"01/11/2026",p:{"Rayyan B":1.9,"QIB":21.3,"Qatar Fuel":13.3,"Lesha Bank":2.815,"Industries Qatar":9.52,"Mesaied":0.91,"Al Meera":12.78,"QETF":8.999,"GWC":2.429}},ps:{d:"04/11/2026",p:{OGDC:307.5,EPQL:23.96,TREET:23.38,PAEL:32.78}}};
+function store(){const H=lsGet("tj.prices",{});let ch=0;for(const ex in SEED)if(!H[ex]||!Object.keys(H[ex]).length){H[ex]={};for(const u in SEED[ex].p)H[ex][u]=[[SEED[ex].d,SEED[ex].p[u]]];ch=1}if(ch)lsSet("tj.prices",H);return H}
+function lastPrice(ex,u){const h=store()[ex][u],l=h&&h.length?h[h.length-1]:null;return +ltv(ex,u,l)||0}
+const kP=()=>F.c/100*(1+F.s/100);
+const tickOf=(ex,p)=>ex==="ps"||p>=10?0.01:0.001;
+const buyCost=(ex,p)=>ex==="ps"?p*(1+kP())+F.d:p*(1+F.q/100);
+const sellNet=(ex,p)=>ex==="ps"?p*(1-kP())-F.d:p*(1-F.q/100);
+const beSell=(ex,c)=>ex==="ps"?(c+F.d)/(1-kP()):c/(1-F.q/100);
+const sameDay=(ex,p)=>ex==="ps"?p/(1-kP()):beSell("qa",buyCost("qa",p));
+
+function parseLed(rows){
+  const i=rows.findIndex(r=>r.some(c=>/^description$/i.test(String(c).trim())));
+  const h=rows[i].map(c=>String(c).trim().toLowerCase()),c=k=>h.indexOf(k),o={tx:[],dep:0,one:0,dl:[]};
+  for(const r of rows.slice(i+1)){
+    const desc=String(r[c("description")]||""),db=num(r[c("debit")]),cr=num(r[c("credit")]),d=pd(r[c("date")]);
+    const m=desc.match(/(Buy|Sell|Difference)\s+(\S+)\s+([\d,.]+)\s*@\s*([\d.]+)/i);
+    if(m){let fee=0;desc.replace(/(Comission Charges|Commission Charges|SST on AdvisoryFee|SST|CDC|FIN|PSX|NCSS|NDM|CGT|AdvisoryFee)\s+([\d.]+)/gi,(_,n,v)=>{fee+=+v});
+      const k=m[1].toLowerCase();o.tx.push({d,k,u:m[2],q:num(m[3]),rate:+m[4],fee,amt:k==="buy"?db:k==="sell"?cr:cr-db})}
+    else if(/fund transfer/i.test(desc)){o.dep+=cr-db;o.dl.push({d,v:cr-db})}
+    else if(/fee/i.test(desc)&&db>0){o.one+=db;o.dl.push({d,v:-db})}
+  }
+  return o;
+}
+function parseOrd(rows){
+  const i=rows.findIndex(r=>r.some(c=>/^scrip$/i.test(String(c).trim())));
+  const h=rows[i].map(c=>String(c).trim().toLowerCase()),c=k=>h.indexOf(k);
+  return rows.slice(i+1).filter(r=>r[c("scrip")]).map(r=>({u:String(r[c("scrip")]).trim(),q:num(r[c("quantity")]),p:num(r[c("gross rate")]),t:String(r[c("type")]).trim().toLowerCase(),d:pd(r[c("execution date")]),c:pd(r[c("clearing date")])})).filter(o=>o.q>0&&/buy|sell/.test(o.t));
+}
+function analysePs(L,O){
+  const qty={},cost={},days={},stock={},used={},exd={},EV=[];
+  const D=d=>days[d]||(days[d]={d,real:0,fees:0,n:0,turn:0,rw:0,dn:0,rtp:0,rtq:0});
+  if(O)O.forEach(o=>{const dd=DAYB==="stmt"&&o.c?o.c:o.d;EV.push({d:dd,u:o.u,dq:0,cash:0,p:o.p});const x=D(dd);x.n++;x.turn+=o.q*o.p;const k=o.u+"|"+o.d,e=exd[k]||(exd[k]={b:0,s:0});e[o.t==="buy"?"b":"s"]+=o.q});
+  const find=(kind,u,q,f)=>{for(const k in exd){const i=k.indexOf("|");if(k.slice(0,i)===u&&!used[kind+k]&&f(exd[k])===q){used[kind+k]=1;return k.slice(i+1)}}return null};
+  for(const t of L.tx){
+    const d=(DAYB!=="stmt"&&O&&find(t.k,t.u,t.q,e=>t.k==="difference"?Math.min(e.b,e.s):t.k==="buy"?e.b-e.s:e.s-e.b))||t.d,x=D(d);
+    x.fees+=t.fee;if(!O)x.n++;EV.push({d,u:t.u,dq:t.k==="buy"?t.q:t.k==="sell"?-t.q:0,cash:t.k==="buy"?-t.amt:t.amt,p:t.k==="difference"?0:t.rate||0});
+    if(t.k==="buy"){qty[t.u]=(qty[t.u]||0)+t.q;cost[t.u]=(cost[t.u]||0)+t.amt}
+    else{let r=t.amt;if(t.k==="sell"){const a=qty[t.u]>0?cost[t.u]/qty[t.u]:0;r=t.amt-a*t.q;cost[t.u]-=a*t.q;qty[t.u]-=t.q}x.real+=r;(x.st||(x.st={}))[t.u]=(x.st[t.u]||0)+r;stock[t.u]=(stock[t.u]||0)+r;if(t.k==="difference"){x.rtp+=r;x.rtq+=t.q}}
+  }
+  const list=Object.values(days).sort((p,q)=>key(p.d)<key(q.d)?-1:1),sum=f=>list.reduce((s,x)=>s+f(x),0),turn=sum(x=>x.turn),fees=sum(x=>x.fees);
+  return{ex:"ps",ps:true,ev:EV,fl:L.dl||[],list,qty,stock,open:Object.keys(qty).filter(u=>qty[u]>0.5).map(u=>({u,q:qty[u],a:cost[u]/qty[u]})),rate:turn?fees/turn:0,real:sum(x=>x.real),fees,turn,n:sum(x=>x.n),rw:0,one:L.one,dn:0,rtp:sum(x=>x.rtp),rtq:sum(x=>x.rtq),win:list.filter(x=>x.real>0.5).length,lose:list.filter(x=>x.real<-0.5).length,trading:list.filter(x=>x.n).length};
+}
+function ingest(wb,raw){
+  let got=0;
+  for(const n of wb.SheetNames){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw,defval:""});
+    const hd=rows.slice(0,40).map(r=>r.map(c=>String(c).trim().toLowerCase()).join("|"));
+    if(hd.some(h=>h.includes("description")&&h.includes("debit"))){R.led=parseLed(rows);got++}
+    else if(hd.some(h=>h.includes("scrip")&&h.includes("gross rate"))){R.ord=parseOrd(rows);got++}
+    else if(rows.some(r=>String(r[0]).trim()==="Date")){R.qa=parse(rows);got++}
+  }
+  if(!got)throw new Error("I didn’t recognise that. I read the Qatar statement (xlsx), and the PSX account statement and order history as pasted table markup or CSV with the same headers.");
+  S.qa=R.qa?Object.assign(analyse(R.qa),{ex:"qa"}):null;
+  S.ps=R.led?analysePs(R.led,R.ord):null;
+  refresh();
+}
+function refresh(){
+  const ks=[["qa","Qatar"],["ps","PSX"]].filter(k=>S[k[0]]);
+  if(!ks.length)throw new Error("I read the order history. Add the PSX account statement too, since its ledger carries the fees and profit.");
+  if(!S[S.ex])S.ex=ks[0][0];
+  render(S[S.ex]);
+  if(ks.length>1)$("#out").insertAdjacentHTML("afterbegin",`<div class="tabs">${ks.map(k=>`<button data-ex="${k[0]}" class="${k[0]===S.ex?"on":""}">${k[1]}</button>`).join("")}</div>`);
+}
+function bepanel(a){
+  const ex=a.ex,H=store(),names=[...new Set([...Object.keys(H[ex]),...a.open.map(o=>o.u),...Object.keys(a.stock)])];
+  const last=u=>{const h=H[ex][u];return h&&h.length?h[h.length-1]:null},dec=t=>t<0.01?3:2;
+  $("#bp").innerHTML=`<p class="mut">Type the latest prices and save them to build a price history in this browser. Same-day exit: buy at the price now and sell today. Other-day exit: sell on a later day, from your average cost if you hold the stock, otherwise from buying at the price now.</p>
+  <label>Date <input type="date" id="bpd" value="${new Date().toLocaleDateString("en-CA")}"></label> <button class="btn" id="bps">Save prices</button> <span id="bpm" class="mut"></span>
+  <table><tr><th>Stock</th><th>Price</th><th>Same-day exit</th><th>Other-day exit</th><th>Saved</th></tr>${names.map((u,i)=>`<tr><td>${esc(u)}</td><td><input data-u="${esc(u)}" value="${last(u)?last(u)[1]:""}" inputmode="decimal"></td><td id="sd${i}">–</td><td id="od${i}">–</td><td class="mut">${last(u)?last(u)[0]:"–"}</td></tr>`).join("")}</table>
+  <p class="note">Break-even prices are rounded up to the next tick, with the ticks to climb in brackets. ${ex==="ps"?"On PSX a same-day round trip settles as a difference and pays commission once, with no CDC, so it breaks even much sooner.":"In Qatar the fee is the same each side, so a new position has the same break-even for both; they differ only for shares you already hold."}</p>
+  <details><summary class="mut">Fee settings</summary><p><label>Qatar per side % <input id="fq" value="${F.q}"></label> <label>PSX commission % <input id="fc" value="${F.c}"></label> <label>PSX tax on commission % <input id="fs" value="${F.s}"></label> <label>PSX CDC per share <input id="fd" value="${F.d}"></label></p></details>
+  <details><summary class="mut">Price history</summary>${names.map(u=>`<p class="mut"><b>${esc(u)}</b> ${(H[ex][u]||[]).slice(-6).reverse().map(h=>h[0]+": "+h[1]).join(" · ")||"no prices yet"}</p>`).join("")}</details>`;
+  const calc=()=>{
+    [...document.querySelectorAll("#bp table input")].forEach((inp,i)=>{
+      const p=parseFloat(inp.value),u=inp.dataset.u,sd=$("#sd"+i),od=$("#od"+i);
+      if(!(p>0)){sd.textContent=od.textContent="–";return}
+      const t=tickOf(ex,p),up=x=>Math.ceil(x/t-1e-9)*t,o=a.open.find(q=>q.u===u);
+      const f=(x,b)=>{const n=Math.round((x-b)/t);return x.toFixed(dec(t))+" ("+(n>0?"+":"")+n+")"};
+      sd.textContent=f(up(sameDay(ex,p)),p);
+      od.textContent=f(up(o?beSell(ex,o.a):beSell(ex,buyCost(ex,p))),p)+(o?" from avg "+o.a.toFixed(dec(t)):"");
+    });
+  };
+  $("#bp").oninput=e=>{const m={fq:"q",fc:"c",fs:"s",fd:"d"}[e.target.id];if(m){const v=parseFloat(e.target.value);if(v>=0){F[m]=v;lsSet("tj.fees",F)}}calc();upCalc()};
+  $("#bps").onclick=()=>{
+    const dv=$("#bpd").value.split("-"),d=dv[2]+"/"+dv[1]+"/"+dv[0];let n=0;
+    document.querySelectorAll("#bp table input").forEach(inp=>{const p=parseFloat(inp.value);if(p>0){const u=inp.dataset.u,h=(H[ex][u]||[]).filter(x=>x[0]!==d);h.push([d,p]);h.sort((x,y)=>key(x[0])<key(y[0])?-1:1);H[ex][u]=h.slice(-90);n++}});
+    lsSet("tj.prices",H);unreal(a);bepanel(a);$("#bpm").textContent="Saved "+n+" prices for "+d;
+  };
+  calc();
+}
+
+const T={qa:null,led:null,ord:null};
+function SAMPLE(){const CL={"29/10":"30/10/2026","30/10":"02/11/2026","02/11":"03/11/2026","03/11":"04/11/2026","04/11":"05/11/2026","05/11":"06/11/2026","06/11":"10/11/2026","10/11":"11/11/2026","11/11":"12/11/2026"};
+  const q=r=>r.map(x=>({d:x[6]||"01/11/2026",t:x[0]==="B"?"Buy":"Sell",u:x[1],q:x[2],p:x[3],net:x[4],fee:x[5]}));
+  const L=[["30/10","d","EPQL",410,16.7854,35.51],["30/10","b","OGDC",1,0.5333,306.77],["02/11","d","EPQL",300,12.2819,52.72],["02/11","d","TREET",204,8.2344,8.21],["02/11","b","OGDC",29,15.5486,8944.78],["03/11","b","EPQL",82,3.7576,1945.52],["03/11","d","TREET",750,30.383,65.12],["03/11","d","EPQL",118,4.8518,2.93],["03/11","b","OGDC",36,19.0098,10934.3],["04/11","s","EPQL",82,3.7953,1960.92],["04/11","b","TREET",1160,52.4141,27059.4],["04/11","d","TREET",400,16.1,19.9],["05/11","d","TREET",850,34.408,168.59],["05/11","s","OGDC",66,35.335,20259.7],["05/11","s","TREET",1160,52.6762,27105.3],["05/11","d","PAEL",1430,81.3487,83.45],["06/11","b","OGDC",50,27.551,15853.1],["06/11","d","PAEL",900,52.808,63.19],["06/11","d","TREET",1500,62.3875,72.61],["06/11","d","OGDC",100,53.9062,35.59],["06/11","b","PAEL",2600,166.6975,89242.7],["10/11","b","OGDC",50,27.2014,15650.3],["10/11","d","TREET",2200,94.2769,107.72],["10/11","b","PAEL",1200,75.3219,40259.3],["11/11","b","ZAL",30,1.8658,996.47],["11/11","d","BIPL",499,20.8307,143.84],["11/11","d","TREET",3000,132.2499,322.75],["11/11","b","LOTCHEM",1000,47.55,24709.5],["11/11","b","HUMNL",50,1.975,451.98],["11/11","b","HUBC",1,0.3655,209.38],["11/11","s","PAEL",3799,243.6885,130048],["11/11","b","BIPL",1,0.0467,24.27],["11/11","b","TREET",50,2.4522,1277.95],["11/11","d","PAEL",100,5.911,-38.91],["12/11","b","HUMNL",550,21.725,4838.73],["12/11","b","LOTCHEM",250,12.06,6287.06],["12/11","d","BIPL",1300,54.8664,151.14],["12/11","s","ZAL",30,1.8612,990.24],["12/11","d","ZAL",200,11.408,14.19],["12/11","d","PAEL",1200,72.5516,467.78],["12/11","b","TREET",2000,97.216,50665.2],["12/11","d","LOTCHEM",1270,55.223,101.98]].map(x=>({d:x[0]+"/2026",k:{d:"difference",b:"buy",s:"sell"}[x[1]],u:x[2],q:x[3],fee:x[4],amt:x[5]}));
+  const O="EPQL,B,150,23.6,29/10;EPQL,B,150,23.51,29/10;EPQL,B,110,23.62,29/10;OGDC,B,1,306.24,29/10;EPQL,S,300,23.7,29/10;EPQL,S,110,23.7,29/10;EPQL,B,70,23.52,30/10;EPQL,B,130,23.52,30/10;EPQL,B,100,23.53,30/10;OGDC,B,5,308.5,30/10;OGDC,B,3,308.5,30/10;OGDC,B,3,307.41,30/10;OGDC,B,3,306.51,30/10;OGDC,B,5,310.25,30/10;OGDC,B,8,306.31,30/10;OGDC,B,2,308.87,30/10;TREET,B,4,23.32,30/10;TREET,B,200,23.32,30/10;EPQL,S,3,23.74,30/10;EPQL,S,297,23.74,30/10;TREET,S,4,23.43,30/10;TREET,S,200,23.4,30/10;EPQL,B,1,23.68,02/11;EPQL,B,100,23.85,02/11;EPQL,B,82,23.68,02/11;EPQL,B,17,23.68,02/11;OGDC,B,5,306.02,02/11;OGDC,B,3,307,02/11;OGDC,B,5,306.5,02/11;OGDC,B,3,307.17,02/11;OGDC,B,20,300.51,02/11;TREET,B,4,23.36,02/11;TREET,B,50,23.36,02/11;TREET,B,100,23.31,02/11;TREET,B,296,23.36,02/11;TREET,B,100,23.4,02/11;TREET,B,200,23.42,02/11;EPQL,S,25,23.89,02/11;EPQL,S,43,23.89,02/11;EPQL,S,50,23.89,02/11;TREET,S,100,23.58,02/11;TREET,S,100,23.48,02/11;TREET,S,300,23.5,02/11;TREET,S,200,23.48,02/11;TREET,S,50,23.49,02/11;TREET,B,400,23.3,03/11;TREET,B,400,23.28,03/11;TREET,B,400,23.3,03/11;TREET,B,260,23.25,03/11;TREET,B,100,23.3,03/11;EPQL,S,82,23.96,03/11;TREET,S,400,23.39,03/11;PAEL,B,10,32.35,04/11;PAEL,B,400,32.7,04/11;PAEL,B,10,32.29,04/11;PAEL,B,1000,32.91,04/11;PAEL,B,10,32.31,04/11;TREET,B,50,23.27,04/11;TREET,B,200,23.2,04/11;TREET,B,200,23.21,04/11;TREET,B,200,23.26,04/11;TREET,B,200,23.16,04/11;OGDC,S,66,307.5,04/11;PAEL,S,30,32.41,04/11;PAEL,S,1000,33.04,04/11;PAEL,S,400,32.78,04/11;TREET,S,200,23.47,04/11;TREET,S,50,23.33,04/11;TREET,S,217,23.38,04/11;TREET,S,310,23.45,04/11;TREET,S,850,23.45,04/11;TREET,S,383,23.38,04/11;OGDC,B,50,313.01,05/11;OGDC,B,50,316.51,05/11;OGDC,B,50,312,05/11;PAEL,B,130,34.01,05/11;PAEL,B,300,34.2,05/11;PAEL,B,400,33.9,05/11;PAEL,B,1500,34.38,05/11;PAEL,B,500,34.1,05/11;PAEL,B,200,34.2,05/11;PAEL,B,470,34.01,05/11;TREET,B,1000,24,05/11;TREET,B,500,24.01,05/11;OGDC,S,38,313.4,05/11;OGDC,S,62,313.4,05/11;PAEL,S,900,34.14,05/11;TREET,S,500,24.08,05/11;TREET,S,1000,24.1,05/11;OGDC,B,20,312.6,06/11;OGDC,B,30,312.37,06/11;PAEL,B,375,33.47,06/11;PAEL,B,425,33.47,06/11;PAEL,B,400,33.52,06/11;TREET,B,350,24.7,06/11;TREET,B,300,24.66,06/11;TREET,B,493,24.83,06/11;TREET,B,50,24.7,06/11;TREET,B,500,24.83,06/11;TREET,B,500,24.69,06/11;TREET,B,7,24.83,06/11;TREET,S,226,24.87,06/11;TREET,S,300,24.79,06/11;TREET,S,500,24.87,06/11;TREET,S,500,24.8,06/11;TREET,S,674,24.87,06/11;BIPL,B,199,24.22,10/11;BIPL,B,300,24.22,10/11;BIPL,B,1,24.22,10/11;HUBC,B,1,209.01,10/11;HUMNL,B,50,9,10/11;LOTCHEM,B,900,24.66,10/11;LOTCHEM,B,100,24.68,10/11;PAEL,B,100,34.61,10/11;TREET,B,500,25.45,10/11;TREET,B,50,25.51,10/11;TREET,B,450,25.51,10/11;TREET,B,500,25.6,10/11;TREET,B,500,25.67,10/11;TREET,B,500,25.55,10/11;TREET,B,500,25.52,10/11;TREET,B,50,25.51,10/11;ZAL,B,20,33.01,10/11;ZAL,B,10,33.44,10/11;BIPL,S,499,24.55,10/11;PAEL,S,1,34.49,10/11;PAEL,S,99,34.71,10/11;PAEL,S,100,34.28,10/11;PAEL,S,476,34.32,10/11;PAEL,S,3223,34.28,10/11;TREET,S,2351,25.68,10/11;TREET,S,149,25.68,10/11;TREET,S,301,25.81,10/11;TREET,S,199,25.81,10/11;BIPL,B,73,24.42,11/11;BIPL,B,27,24.42,11/11;BIPL,B,400,24.22,11/11;BIPL,B,219,24.41,11/11;BIPL,B,181,24.41,11/11;BIPL,B,400,24.34,11/11;HUMNL,B,500,8.77,11/11;HUMNL,B,50,8.64,11/11;LOTCHEM,B,400,25.27,11/11;LOTCHEM,B,120,25.32,11/11;LOTCHEM,B,500,25.2,11/11;LOTCHEM,B,250,25.1,11/11;LOTCHEM,B,250,25.1,11/11;PAEL,B,300,34.7,11/11;PAEL,B,300,34.6,11/11;PAEL,B,300,34.54,11/11;PAEL,B,300,34.65,11/11;TREET,B,400,25.4,11/11;TREET,B,400,25.5,11/11;TREET,B,400,25.22,11/11;TREET,B,400,25.3,11/11;TREET,B,400,25,11/11;ZAL,B,20,33,11/11;ZAL,B,20,32.9,11/11;ZAL,B,80,32.91,11/11;ZAL,B,30,32.97,11/11;ZAL,B,50,32.97,11/11;BIPL,S,1201,24.49,11/11;BIPL,S,99,24.48,11/11;LOTCHEM,S,900,25.38,11/11;LOTCHEM,S,100,25.23,11/11;LOTCHEM,S,10,25.23,11/11;LOTCHEM,S,10,25.38,11/11;LOTCHEM,S,200,25.23,11/11;LOTCHEM,S,50,25.23,11/11;PAEL,S,100,35.32,11/11;PAEL,S,50,35.03,11/11;PAEL,S,300,35.03,11/11;PAEL,S,3,35.03,11/11;PAEL,S,120,35.03,11/11;PAEL,S,50,35.03,11/11;PAEL,S,77,35.32,11/11;PAEL,S,500,35.03,11/11;ZAL,S,200,33.07,11/11;ZAL,S,30,33.07,11/11".split(";").map(s=>{const a=s.split(",");return{u:a[0],q:+a[2],p:+a[3],t:a[1]==="B"?"buy":"sell",d:a[4]+"/2026",c:CL[a[4]]}});
+  return{qa:{tr:q([["B","QIB",302,20.2161,-6105.26,0,"31/10/2026"],["B","Lesha Bank",1300,2.7931,-3631.03,0,"31/10/2026"],["B","Industries Qatar",1,10,-10,0,"31/10/2026"],["S","Industries Qatar",1,9.099,10,0],["B","Rayyan B",200,1.92,-386,2],["S","Rayyan B",200,1.879,375,2],["B","Rayyan B",200,1.896,-381,2],["S","QIB",302,20.39,6141,17],["B","QIB",100,20.56,-2062,6],["S","Lesha Bank",1300,2.809,3642,11],["S","QIB",100,20.7,2065,6],["B","Rayyan B",50,1.893,-95,1],["B","QIB",50,20.7,-1038,3],["B","Industries Qatar",100,9.273,-930,3],["B","Qatar Fuel",100,13.08,-1312,4],["S","QIB",50,20.83,1039,3],["B","Mesaied",500,0.897,-450,2],["B","Lesha Bank",300,2.812,-846,3],["S","Rayyan B",200,1.911,382,2],["S","Mesaied",500,0.903,451,2],["B","Mesaied",1,0.904,-1,0],["B","QIB",1,20.67,-21,0],["B","Rayyan B",99,1.919,-191,1],["B","Rayyan B",1,1.919,-2,0],["B","Rayyan B",100,1.916,-193,1],["B","Rayyan B",150,1.9,-286,1],["S","Rayyan B",400,1.916,765,3],["B","Rayyan B",1,1.91,-2,0],["B","Rayyan B",50,1.908,-96,1],["B","QIB",100,21.16,-2122,6],["B","Industries Qatar",200,9.65,-1936,6],["B","Mesaied",500,0.924,-464,2],["S","QIB",100,21.53,2148,6],["B","QIB",150,21.8,-3279,9],["B","Rayyan B",1,1.914,-2,0],["B","QIB",50,21.65,-1086,3],["B","Mesaied",300,0.919,-277,1],["S","Industries Qatar",300,9.694,2901,8],["B","Industries Qatar",1,9.695,-10,0],["B","Qatar Fuel",100,13.6,-1364,4],["S","Rayyan B",52,1.914,100,1],["S","Lesha Bank",300,2.83,847,3],["B","Rayyan B",1,1.915,-2,0],["B","Industries Qatar",1,9.686,-10,0],["B","Qatar Fuel",50,13.48,-676,2],["B","QIB",50,21.3,-1068,3],["B","QIB",50,21.3,-1068,3],["B","Lesha Bank",100,2.815,-283,1],["B","Mesaied",100,0.91,-92,1],["B","Mesaied",300,0.91,-274,1]]),rw:{"01/11/2026":40},dep:{"31/10/2026":11591.29}},led:{tx:L,dep:192000,one:2000,dl:[{d:"28/10/2026",v:-2000},{d:"29/10/2026",v:12000},{d:"30/10/2026",v:8000},{d:"02/11/2026",v:29000},{d:"04/11/2026",v:13000},{d:"05/11/2026",v:50000},{d:"06/11/2026",v:80000}]},ord:O};
+}
+function save(){lsSet("tj.data",{R,T})}
+function restore(){const d=lsGet("tj.data",null),s=SAMPLE();if(d&&d.R){Object.assign(R,d.R);Object.assign(T,d.T)}for(const k of["qa","led","ord"])if(!R[k])R[k]=s[k]}
+function ledFromOrd(O){
+  const g={},tx=[];
+  O.forEach(o=>{const k=o.u+"|"+o.d,e=g[k]||(g[k]={u:o.u,d:o.d,c:o.c,bq:0,bv:0,sq:0,sv:0});if(o.t==="buy"){e.bq+=o.q;e.bv+=o.q*o.p}else{e.sq+=o.q;e.sv+=o.q*o.p}});
+  for(const e of Object.values(g)){
+    const m=Math.min(e.bq,e.sq),ap=e.bq?e.bv/e.bq:0,as=e.sq?e.sv/e.sq:0;
+    if(m>0){const f=m*as*kP();tx.push({d:(DAYB==="stmt"&&e.c?e.c:e.d),k:"difference",u:e.u,q:m,fee:f,amt:m*(as-ap)-f})}
+    if(e.bq>m){const q=e.bq-m,v=q*ap;tx.push({d:(DAYB==="stmt"&&e.c?e.c:e.d),k:"buy",u:e.u,q,fee:v*kP()+q*F.d,amt:v*(1+kP())+q*F.d})}
+    if(e.sq>m){const q=e.sq-m,v=q*as;tx.push({d:(DAYB==="stmt"&&e.c?e.c:e.d),k:"sell",u:e.u,q,fee:v*kP()+q*F.d,amt:v*(1-kP())-q*F.d})}
+  }
+  tx.sort((a,b)=>key(a.d)<key(b.d)?-1:1);
+  return{tx,dep:0,one:0};
+}
+function ingest(wb,raw){
+  let got=0,wrong="";const now=new Date().toISOString();
+  for(const n of wb.SheetNames){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw,defval:""});
+    const hd=rows.slice(0,40).map(r=>r.map(c=>String(c).trim().toLowerCase()).join("|"));
+    if(hd.some(h=>h.includes("description")&&h.includes("debit"))){if(ONLY&&ONLY!=="led"){wrong="the order history or Qatar statement";got++}else{R.led=parseLed(rows);T.led=now;got++;logIt("led")}}
+    else if(hd.some(h=>h.includes("scrip")&&h.includes("gross rate"))){if(ONLY&&ONLY!=="ord"){wrong="the account statement or Qatar statement";got++}else{R.ord=parseOrd(rows);T.ord=now;got++;logIt("ord")}}
+    else if(rows.some(r=>String(r[0]).trim()==="Date")){if(ONLY&&ONLY!=="qa"){wrong="a Qatar statement";got++}else{R.qa=parse(rows);T.qa=now;got++;logIt("qa")}}
+  }
+  if(!got)throw new Error("I didn’t recognise that. I read the Qatar statement (xlsx), and the PSX account statement and order history as pasted table markup or CSV with the same headers.");
+  save();refresh();if(wrong)throw new Error("That looks like "+wrong+", not what this box expects, so I left it out. Paste it in its own place.");
+}
+function refresh(){
+  S.qa=Object.assign(analyse(R.qa),{ex:"qa"});
+  let L=R.led,O=R.ord,ext=0;const est=!R.led;
+  if(est)L=ledFromOrd(R.ord);else{if(T.led&&!T.ord)O=null;if(O){const ld=L.tx.reduce((m,t)=>key(t.d)>m?key(t.d):m,""),x=ledFromOrd(O.filter(o=>key(o.d)>=ld));ext=x.tx.length>0;L={...L,tx:[...L.tx,...x.tx]}}}
+  S.ps=analysePs(L,O);S.ps.est=est;S.ps.ext=ext;
+  ["qa","ps"].forEach(ex=>{render(S[ex]);board(ex)});imports();document.querySelectorAll("[data-day]").forEach(b=>{b.style.outline=b.dataset.day===DAYB?"2px solid var(--acc)":""});
+}
+function board(ex){
+  const a=S[ex],H=store(),PT=lsGet("tj.ptime",{}),el=$("#bd-"+ex);
+  const dt=t=>new Date(t).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"});
+  const names=[...new Set([...Object.keys(H[ex]),...a.open.map(o=>o.u),...Object.keys(a.stock)])];
+  const last=u=>{const h=H[ex][u];return h&&h.length?h[h.length-1]:null};
+  const src=ex==="qa"?"Statement: "+(T.qa?"updated "+dt(T.qa):"placeholder, a sample from your 1 Nov statement"):"Account statement: "+(T.led?"updated "+dt(T.led):T.ord?"placeholder up to 12 Nov, later days estimated from the order history":"placeholder, a sample: statement up to 12 Nov")+" · Order history: "+(T.ord?"updated "+dt(T.ord):"placeholder");
+  el.innerHTML=`<p class="upd">${src}<br>Prices: ${PT[ex]?"last saved "+dt(PT[ex]):"starting prices, not yet saved by you"}</p>
+  <div class="card scroll"><label>Date <input type="date" value="${new Date().toLocaleDateString("en-CA")}"></label> <button class="btn sv">Save prices</button> <span class="mut sm"></span>
+  <table><tr><th>Stock</th><th>Held</th><th>Avg cost</th><th>Price</th><th>Unrealised</th><th>RTP, same day</th><th>RTP, other day</th><th>RTC, same day</th><th>RTC, other day</th></tr>${names.map(u=>{const o=a.open.find(q=>q.u===u),l=last(u);return`<tr data-u="${esc(u)}"><td>${esc(u)}</td><td>${o?fmt(o.q):"–"}</td><td>${o?(ex==="ps"?cu(o.a):o.a.toFixed(4)):"–"}</td><td><input value="${ltv(ex,u,l)}" inputmode="decimal" aria-label="${esc(u)} price"></td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>`}).join("")}</table>
+  <p class="note">RTP (round trip price) is the exact price where selling nets 0 after fees if you buy at the current price, with the first tick at or above it and the ticks to climb in brackets. RTC (round trip cost) is RTP minus the current price, per share, then as a % of the price and, for shares you hold, the total for them. The other-day RTP for a share you hold starts from your average cost. Selling at that tick or higher cannot lose to fees, one tick lower can. Same day: buy now, sell today. Other day: from your average cost if you hold it, otherwise from buying at the price now.${ex==="ps"?" On PSX a same-day round trip pays commission once with no CDC.":" In Qatar the fee is the same each side, so a new position has the same break-even for both."}${a.est?" PSX figures are estimated from the order history until you load the account statement.":""}${a.ext?" PSX days after the last account statement line are estimated from the order history.":""}</p>
+  ${ex==="qa"?`<details><summary class="mut">Paste your broker’s market table to fill the prices</summary><p class="mut">Copy the rows of the market prices table on your Qatar broker’s page (Symbol, Company Name, Offer Shares … Close Price … Prev Close) and paste them here. The Close Price of each stock whose name matches goes into its Price box above. Then press Save prices to keep it.</p><textarea class="mk" id="mk-qa" rows="5" placeholder="Paste the copied market table rows here"></textarea></details>`:""}<details><summary class="mut">Price history</summary>${names.map(u=>`<p class="mut"><b>${esc(u)}</b> ${(H[ex][u]||[]).slice(-6).reverse().map(h=>h[0]+": "+h[1]).join(" · ")||"no prices yet"}</p>`).join("")}</details></div>`;
+  const cell=(x,p,t,dc)=>{const up=Math.ceil(x/t-1e-9)*t,n=Math.round((up-p)/t);return ex==="ps"?`<b>${up.toFixed(2)}</b><br><span class="mut">${n>0?"+":""}${n} ticks</span>`:`<b>${x.toFixed(4)}</b><br><span class="mut">tick ${up.toFixed(dc)} (${n>0?"+":""}${n})</span>`};
+  const calc=()=>el.querySelectorAll("tr[data-u]").forEach(r=>{
+    const u=r.dataset.u,p=parseFloat(r.querySelector("input").value),c=r.children,o=a.open.find(q=>q.u===u);
+    if(!(p>0)){c[4].textContent=c[5].textContent=c[6].textContent=c[7].textContent=c[8].textContent="–";c[4].className="";return}
+    const t=tickOf(ex,p),dc=t<0.01?3:2;
+    if(o){const v=o.q*(sellNet(ex,p)-o.a);c[4].textContent=sg(v);c[4].className=cl(v)}else{c[4].textContent="–";c[4].className=""}
+    c[5].innerHTML=cell(sameDay(ex,p),p,t,dc);
+    c[6].innerHTML=cell(o?beSell(ex,o.a):beSell(ex,buyCost(ex,p)),p,t,dc);
+    const rc=x=>{const ps=ex==="ps",d=(ps?Math.ceil(x*100-1e-9)/100:x)-p,z=ps?2:4;return`<b>${d.toFixed(z)}</b><br><span class="mut">${(d/p*100).toFixed(z)}%${o?" · ×"+fmt(o.q)+" = "+fmt(d*o.q,2):""}</span>`};
+    c[7].innerHTML=rc(sameDay(ex,p));c[8].innerHTML=rc(beSell(ex,buyCost(ex,p)));
+  });
+  el._c=calc;el.oninput=calc;
+  const mk=el.querySelector(".mk");if(mk)mk.oninput=()=>{const m=fromMarket(mk.value,names);el.querySelectorAll("tr[data-u]").forEach(r=>{const v=m[r.dataset.u.toLowerCase()];if(v)r.querySelector("input").value=v[1]});calc()};
+  el.querySelector(".sv").onclick=()=>{
+    const dv=el.querySelector("input[type=date]").value.split("-"),d=dv[2]+"/"+dv[1]+"/"+dv[0];let n=0;
+    el.querySelectorAll("tr[data-u]").forEach(r=>{const p=parseFloat(r.querySelector("input").value);if(p>0){const u=r.dataset.u,h=(H[ex][u]||[]).filter(x=>x[0]!==d);h.push([d,p]);h.sort((x,y)=>key(x[0])<key(y[0])?-1:1);H[ex][u]=h.slice(-90);n++}});
+    lsSet("tj.prices",H);PT[ex]=new Date().toISOString();lsSet("tj.ptime",PT);board(ex);el.querySelector(".sm").textContent="Saved "+n+" prices for "+d;
+  };
+  calc();
+}
+
+let ONLY="";
+const KN={qa:"Qatar statement",led:"Account statement",ord:"Order history"};
+const fmtD=t=>new Date(t).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"});
+function fromMarket(t,names){const m={};t.split(/\n/).forEach(l=>{const n=(l.match(/\d[\d,]*\.?\d*/g)||[]).map(s=>parseFloat(s.replace(/,/g,""))),low=l.toLowerCase();names.forEach(u=>{if(n.length>=10&&low.includes(u.toLowerCase()))m[u.toLowerCase()]=[n[9],n[2]]})});return m}
+function meta(k){
+  const ds=(k==="qa"?R.qa.tr:k==="led"?R.led.tx:R.ord).map(x=>x.d).sort((a,b)=>key(a)<key(b)?-1:1);
+  return{n:ds.length,r:ds.length?ds[0]+" to "+ds[ds.length-1]:"no dates"};
+}
+function logIt(k){LAST.push(k);const m=meta(k),L=lsGet("tj.log",[]);L.unshift({k,t:T[k],n:m.n,r:m.r,rep:L.some(x=>x.k===k)?"replaced the previous one":"replaced the placeholder"});lsSet("tj.log",L.slice(0,30))}
+function crow(k){const m=meta(k),t=T[k],u=k==="led"?"lines":"records";return`<div class="row"><div><b>${KN[k]}</b><br><span class="mut">${m.n} ${u} · ${m.r}<br>${t?"updated "+fmtD(t):"placeholder sample, not loaded by you yet"}</span></div><span class="pill ${t?"ok":""}">${t?"Loaded":"Placeholder"}</span></div>`}
+function imports(){
+  const LOG=lsGet("tj.log",[]);
+  const hist=ks=>{const L=LOG.filter(x=>ks.includes(x.k));return L.length?L.slice(0,10).map(x=>`<div class="row"><div><b>${KN[x.k]}</b><br><span class="mut">${fmtD(x.t)} · ${x.n} ${x.k==="led"?"lines":"records"} · ${x.r}<br>${x.rep}</span></div></div>`).join(""):`<p class="mut">Nothing loaded yet, so the placeholder above is what you are seeing.</p>`};
+  $("#im-qa").innerHTML=`<h3>Current data</h3>${crow("qa")}<h3>Import history</h3>${hist(["qa"])}${xcard("qa")}`;
+  $("#im-ps").innerHTML=`<h3>Current data</h3>${crow("led")}${crow("ord")}<h3>Import history</h3>${hist(["led","ord"])}${xcard("ps")}`;
+}
+function pasteSrc(t,k,box){
+  const err=$("#err");err.hidden=true;
+  try{
+    if(!window.XLSX)throw new Error("The spreadsheet reader didn’t load. Reload the page.");
+    if(!t.trim())throw new Error("Paste the table first.");
+    ONLY=k;
+    (/<table/i.test(t)?t.split(/(?=<table)/i).filter(x=>/<table/i.test(x)):[t]).forEach(x=>ingest(XLSX.read(x,{type:"string",raw:true}),false));
+    box.value="";
+  }catch(e){err.textContent=e.message;err.hidden=false}finally{ONLY=""}
+}
+function route(){
+  const v=(location.hash||"#overview").slice(1);
+  document.querySelectorAll("[data-p]").forEach(p=>{p.hidden=false;p.id=p.dataset.p});
+  const t=v==="overview"?null:document.getElementById(v==="qse"||v==="psx"?v+"-import":v);
+  if(t)t.scrollIntoView({behavior:"smooth",block:"start"});else scrollTo({top:0,behavior:"smooth"});
+  document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));
+  $("#nav").classList.remove("open");
+}
+
+function trend(a){
+  const ds=[...new Set([...a.ev.map(e=>e.d),...a.fl.map(f=>f.d)])].sort((x,y)=>key(x)<key(y)?-1:1);
+  if(!ds.length)return"";
+  const by={},fb={},rd={};
+  a.ev.forEach(e=>(by[e.d]=by[e.d]||[]).push(e));a.fl.forEach(f=>{fb[f.d]=(fb[f.d]||0)+f.v});a.list.forEach(x=>{rd[x.d]=x});
+  const qty={},cost={},px={},Z=[];let cash=0,rl=0,dn=0,dep=0;
+  ds.forEach((d,i)=>{
+    const f=fb[d]||0;cash+=f;if(f>0)dep+=f;
+    (by[d]||[]).forEach(e=>{
+      const u=e.u;cash+=e.cash;
+      if(e.dq>0){qty[u]=(qty[u]||0)+e.dq;cost[u]=(cost[u]||0)-e.cash}
+      else if(e.dq<0){const av=qty[u]>0?cost[u]/qty[u]:0;cost[u]-=av*-e.dq;qty[u]+=e.dq}
+      if(e.p>0)px[u]=e.p;
+    });
+    if(rd[d])rl+=rd[d].real;const dd={};(by[d]||[]).forEach(e=>{const o=dd[e.u]||(dd[e.u]={c:0,q:0,p:0});o.c+=e.cash;o.q+=e.dq;if(e.p>0)o.p=e.p});for(const u in dd){const o=dd[u];dn+=o.c+o.q*(o.p||px[u]||0)}
+    let hv=0,un=0;
+    for(const u in qty)if(qty[u]>0.5){const p=(i===ds.length-1&&lastPrice(a.ex,u))||px[u]||cost[u]/qty[u];hv+=qty[u]*p;un+=qty[u]*sellNet(a.ex,p)-cost[u]}
+    Z.push({d,nw:cash+hv,rl,un,dn,both:rl+un,hold:rl+un-dn});
+  });
+  TD[a.ex]={Z,dep};if(Z)return"";const showDn=Z.some(r=>Math.abs(r.dn)>0.5),step=40,L=46,Rm=46,top=14,h=250,ph=h-top-30,w=Math.max(Z.length*step+L+Rm,320);
+  const nws=Z.map(r=>r.nw),lo=Math.min(...nws),hi=Math.max(...nws),pad=(hi-lo)*0.2||Math.max(1,Math.abs(hi)*0.01);
+  const y1=v=>top+ph*(1-(v-(lo-pad))/(hi-lo+2*pad));
+  const pl=Z.flatMap(r=>showDn?[r.rl,r.un,r.dn,0]:[r.rl,r.un,0]),plo=Math.min(...pl),phi=Math.max(...pl),pp=(phi-plo)*0.1||1;
+  const y2=v=>top+ph*(1-(v-(plo-pp))/(phi-plo+2*pp)),X=i=>L+i*step+step/2,ev=Math.ceil(Z.length/12);
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Realised, unrealised and net worth by day"><line x1="${L}" x2="${w-Rm}" y1="${y2(0)}" y2="${y2(0)}" stroke="var(--line)" stroke-dasharray="3 3"/>`;
+  Z.forEach((r,i)=>{const y=y1(r.nw);s+=`<rect x="${X(i)-10}" y="${y}" width="20" height="${top+ph-y}" rx="2" fill="var(--acc)" opacity=".3"><title>${r.d}: net worth ${fmt(r.nw)}</title></rect>`;if(i%ev===0)s+=`<text x="${X(i)}" y="${h-12}" font-size="9" text-anchor="middle" fill="var(--mut)">${r.d.slice(0,5)}</text>`});
+  const ln=(k,c)=>`<polyline fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" points="${Z.map((r,i)=>X(i)+","+y2(r[k])).join(" ")}"/>`;
+  s+=ln("rl","#5db7f0")+ln("un","#8b95a1")+(showDn?ln("dn","#f08a1c"):"");
+  const tx=(x,y,t,an)=>`<text x="${x}" y="${y+3}" font-size="9" text-anchor="${an}" fill="var(--mut)">${t}</text>`;
+  s+=tx(L-4,y1(hi),fmt(hi),"end")+tx(L-4,y1(lo),fmt(lo),"end")+tx(w-Rm+4,y2(phi),sg(phi),"start")+tx(w-Rm+4,y2(plo),sg(plo),"start")+"</svg>";
+  return`<div class="lg"><span><i style="background:#5db7f0"></i>Realised, cumulative</span><span><i style="background:#8b95a1"></i>Unrealised, open positions</span>${showDn?`<span><i style="background:#f08a1c"></i>Trades vs doing nothing, cumulative</span>`:""}<span><i style="background:var(--acc);opacity:.35"></i>Net worth by day (columns)</span></div>${s}<p class="note">Lines use the right axis and the columns use the left axis. Net worth is cash plus shares at the last traded price each day, and the last day uses your saved price.${dep>0?"":" This statement shows no deposits, so net worth starts from your first trade. Reload the statement to include them."}${showDn?"":" The vs-doing-nothing line is not calculated for PSX."}</p>`;
+}
+
+const TD={};
+function trendInit(a){
+  const el=$("#tr-"+a.ex),T0=TD[a.ex];
+  if(!el||!T0||!T0.Z.length)return;
+  const Z=T0.Z,dep=T0.dep,showDn=true,W=720,H=300,L=54,Rm=54,top=16,ph=H-top-28,pw=W-L-Rm,BL="#1ec8ff",GR="#a9b4c2",OR="#ff9a1f",NW="#2be4a4";
+  let a0=0,b0=Z.length-1,G=null,drag=null;
+  el.innerHTML=`<div class="lg"><span><i style="background:${BL}"></i>Realised, cumulative</span><span><i style="background:${GR}"></i>Unrealised, open positions</span><span><i style="background:#c06bff"></i>Your result, closed + open</span><span><i style="background:${OR}"></i>If you hadn’t traded</span><span><i style="background:${NW}"></i>Net worth by day, columns</span></div>
+  <div><button class="btn zb" data-z="in">Zoom in</button> <button class="btn zb" data-z="out">Zoom out</button> <button class="btn zb" data-z="all">Show all</button> <span class="mut rg"></span></div>
+  <div class="chw"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;touch-action:pan-y;cursor:crosshair"></svg><div class="tip" hidden></div></div>
+  <p class="note">Mouse wheel zooms the timespan, drag moves it, double-click shows everything, and on a phone use the buttons. Lines use the right axis and columns the left. Net worth is cash plus shares at the last traded price each day, and the last day uses your saved price.${dep>0?"":" This statement shows no deposits, so net worth starts from your first trade. Reload the statement to include them."}${a.ext||a.est?" Deposits after your last statement line are unknown, so net worth on those days is approximate.":""} The orange line is your result minus what your trades added or cost, so it shows what just holding would have given. The gap between the purple and orange lines is the trading effect.</p>`;
+  const svg=el.querySelector("svg"),tip=el.querySelector(".tip");
+  const draw=()=>{
+    const V=Z.slice(a0,b0+1),n=V.length,nws=V.map(r=>r.nw),lo=Math.min(...nws),hi=Math.max(...nws),pad=(hi-lo)*0.2||Math.max(1,Math.abs(hi)*0.01);
+    const y1=v=>top+ph*(1-(v-(lo-pad))/(hi-lo+2*pad)),pl=V.flatMap(r=>[r.rl,r.un,r.both,r.hold,0]),plo=Math.min(...pl),phi=Math.max(...pl),pp=(phi-plo)*0.1||1;
+    const y2=v=>top+ph*(1-(v-(plo-pp))/(phi-plo+2*pp)),X=i=>L+(i+0.5)*pw/n,bw=Math.min(26,pw/n*0.7),k=Math.ceil(n/8);
+    G={n,X,y2};
+    const ln=(kk,c)=>`<polyline fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="${V.map((r,i)=>X(i)+","+y2(r[kk])).join(" ")}"/>`;
+    const tx=(x,y,t,an)=>`<text x="${x}" y="${y+3}" font-size="10" text-anchor="${an}" fill="var(--mut)">${t}</text>`;
+    svg.innerHTML=`<line x1="${L}" x2="${W-Rm}" y1="${y2(0)}" y2="${y2(0)}" stroke="var(--line)" stroke-dasharray="3 3"/>`
+      +V.map((r,i)=>`<rect x="${X(i)-bw/2}" y="${y1(r.nw)}" width="${bw}" height="${top+ph-y1(r.nw)}" rx="2" fill="${NW}" opacity=".5"/>`+(i%k===0?tx(X(i),H-10,r.d.slice(0,5),"middle"):"")).join("")
+      +ln("rl",BL)+ln("un",GR)+ln("both","#c06bff")+ln("hold",OR)
+      +tx(L-5,y1(hi),fmt(hi),"end")+tx(L-5,y1(lo),fmt(lo),"end")+tx(W-Rm+5,y2(phi),sg(phi),"start")+tx(W-Rm+5,y2(plo),sg(plo),"start")+`<g id="hv"></g>`;
+    el.querySelector(".rg").textContent=V[0].d+" to "+V[n-1].d;
+  };
+  const hide=()=>{tip.hidden=true;const g=svg.querySelector("#hv");if(g)g.innerHTML=""};
+  const hover=e=>{
+    const r=svg.getBoundingClientRect(),xr=(e.clientX-r.left)/r.width*W,i=Math.floor((xr-L)/(pw/G.n));
+    if(i<0||i>=G.n){hide();return}
+    const gi=a0+i,p=Z[gi],pv=Z[gi-1],x=G.X(i);
+    svg.querySelector("#hv").innerHTML=`<line x1="${x}" x2="${x}" y1="${top}" y2="${top+ph}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="4 3"/>`+[["rl",BL],["un",GR],["both","#c06bff"],["hold",OR]].map(([kk,c])=>`<circle cx="${x}" cy="${G.y2(p[kk])}" r="4.5" fill="${c}" stroke="var(--card)" stroke-width="1.5"/>`).join("");
+    tip.innerHTML=`<b>${p.d}</b><dl><dt>Net worth</dt><dd>${fmt(p.nw)}</dd>${pv?`<dt>Day change</dt><dd class="${cl(p.nw-pv.nw)}">${sg(p.nw-pv.nw)}</dd>`:""}<dt>Realised</dt><dd class="${cl(p.rl)}">${sg(p.rl)}</dd><dt>Unrealised</dt><dd class="${cl(p.un)}">${sg(p.un)}</dd><dt>Your result</dt><dd class="${cl(p.both)}">${sg(p.both)}</dd><dt>If you hadn’t traded</dt><dd class="${cl(p.hold)}">${sg(p.hold)}</dd><dt>Trading effect</dt><dd class="${cl(p.dn)}">${sg(p.dn)}</dd></dl>`;
+    tip.hidden=false;const w=el.querySelector(".chw").clientWidth,px=x/W*w;
+    tip.style.left=(px+14+tip.offsetWidth>w?Math.max(0,px-tip.offsetWidth-14):px+14)+"px";
+  };
+  const zoom=(dir,f)=>{const n=b0-a0+1,m=Math.max(Math.min(3,Z.length),Math.min(Z.length,Math.round(n*(dir>0?1.35:0.7)))),c=a0+f*n;a0=Math.max(0,Math.min(Z.length-m,Math.round(c-f*m)));b0=a0+m-1;draw()};
+  svg.addEventListener("wheel",e=>{e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY,Math.min(1,Math.max(0,((e.clientX-r.left)/r.width*W-L)/pw)))},{passive:false});
+  svg.addEventListener("pointerdown",e=>{drag={x:e.clientX,a:a0};svg.setPointerCapture(e.pointerId);hover(e)});
+  svg.addEventListener("pointermove",e=>{if(drag&&e.buttons){const r=svg.getBoundingClientRect(),n=b0-a0+1,s=Math.round(-(e.clientX-drag.x)/(r.width*pw/W/n));a0=Math.max(0,Math.min(Z.length-n,drag.a+s));b0=a0+n-1;draw()}hover(e)});
+  svg.addEventListener("pointerup",()=>{drag=null});
+  svg.addEventListener("pointerleave",hide);
+  svg.addEventListener("dblclick",()=>{a0=0;b0=Z.length-1;draw()});
+  el.querySelectorAll(".zb").forEach(bt=>bt.onclick=()=>{const z=bt.dataset.z;if(z==="all"){a0=0;b0=Z.length-1;draw()}else zoom(z==="in"?-1:1,0.5)});
+  draw();
+}
+
+function pair(a){const Z=(TD[a.ex]||{}).Z||[],z=Z[Z.length-1];if(!z)return"";const p=Z[Z.length-2]||{both:0,hold:0},y=z.both-p.both,h=z.hold-p.hold;return`<tr><td>Your result, closed + open</td><td class="${cl(y)}">${sg(y)}</td></tr><tr><td>If you hadn’t traded</td><td class="${cl(h)}">${sg(h)}</td></tr><tr><td><b>Your trades made it ${y-h>=0?"better":"worse"} by</b></td><td class="${cl(y-h)}"><b>${sg(y-h)}</b></td></tr>`}
+function dayPair(a,d){const Z=(TD[a.ex]||{}).Z||[],i=Z.findIndex(z=>z.d===d);if(i<0)return"";const z=Z[i],p=Z[i-1]||{both:0,hold:0},y=z.both-p.both,h=z.hold-p.hold;return`<dt>Your result</dt><dd class="${cl(y)}">${sg(y)}</dd><dt>If not traded</dt><dd class="${cl(h)}">${sg(h)}</dd><dt>Trading effect</dt><dd class="${cl(y-h)}">${sg(y-h)}</dd>`}
+
+function plRows(a){
+  const us=Object.keys(a.stock).sort(),cu2={},rows=[];let cum=0;
+  a.list.forEach(x=>{cum+=x.real;const t={};us.forEach(u=>{const v=(x.st&&x.st[u])||0;cu2[u]=(cu2[u]||0)+v;t[u]={day:v,cum:cu2[u]}});rows.push({d:x.d,net:x.real,cum,t})});
+  return{us,rows};
+}
+function plInit(a){
+  const el=$("#pl-"+a.ex),mm=$("#pm-"+a.ex);if(!el||!mm)return;
+  const{us,rows}=plRows(a);if(!rows.length)return;
+  const PAL=["#1ec8ff","#ff9a1f","#c06bff","#ffd23f","#ff5d9e","#7cff6b","#ff7a45","#8fb4ff","#e0b0ff"],col=i=>PAL[i%PAL.length];
+  ichart(el,{rows,colV:r=>r.net,colName:"Net P&L per day",legend:true,btns:true,
+    lines:[{n:"Net P&L, total",c:"var(--ink)",w:3.5,v:r=>r.cum},...us.map((u,i)=>({n:u+", total",c:col(i),w:2,v:r=>r.t[u].cum}))],
+    tip:r=>[["Net, day",r.net],["Net, total",r.cum],...us.map(u=>[u+" day · total",r.t[u].day,r.t[u].cum])]});
+  mm.innerHTML=us.map((u,i)=>`<div class="card"><b>${esc(u)}</b> <span class="mut">closed P&amp;L, ${sg(a.stock[u])} in total</span><div id="pm-${a.ex}-${i}"></div></div>`).join("");
+  us.forEach((u,i)=>ichart($("#pm-"+a.ex+"-"+i),{rows:rows.map(r=>({d:r.d,day:r.t[u].day,cum:r.t[u].cum})),colV:r=>r.day,colName:"Day",H:210,lines:[{n:"Total",c:col(i),w:3,v:r=>r.cum}],tip:r=>[["Day",r.day],["Total",r.cum]]}));
+}
+function ichart(el,cfg){
+  const rows=cfg.rows,W=720,H=cfg.H||270,L=50,Rm=12,top=12,ph=H-top-26,pw=W-L-Rm,hid=new Set(),POS="#2be4a4",NEG="#ff5d6c";
+  let a0=0,b0=rows.length-1,G=null,drag=null;
+  el.innerHTML=(cfg.legend?`<div class="lg">${cfg.lines.map((l,i)=>`<span class="lt" data-i="${i}" style="cursor:pointer"><i style="background:${l.c}"></i>${esc(l.n)}</span>`).join("")}<span><i style="background:${POS}"></i>${esc(cfg.colName)}</span></div>`:"")+(cfg.btns?`<div><button class="btn zb" data-z="in">Zoom in</button> <button class="btn zb" data-z="out">Zoom out</button> <button class="btn zb" data-z="all">Show all</button> <span class="mut rg"></span></div>`:"")+`<div class="chw"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;touch-action:pan-y;cursor:crosshair"></svg><div class="tip" hidden></div></div>`;
+  const svg=el.querySelector("svg"),tip=el.querySelector(".tip");
+  const draw=()=>{
+    const V=rows.slice(a0,b0+1),n=V.length,vals=[0,...V.map(cfg.colV),...cfg.lines.flatMap((l,j)=>hid.has(j)?[]:V.map(l.v))],lo=Math.min(...vals),hi=Math.max(...vals),pd=(hi-lo)*0.1||1;
+    const y=v=>top+ph*(1-(v-(lo-pd))/(hi-lo+2*pd)),X=i=>L+(i+0.5)*pw/n,bw=Math.min(24,pw/n*0.65),k=Math.ceil(n/8);
+    G={n,X,y};
+    const tx=(x,yy,t,an)=>`<text x="${x}" y="${yy+3}" font-size="10" text-anchor="${an}" fill="var(--mut)">${t}</text>`;
+    svg.innerHTML=`<line x1="${L}" x2="${W-Rm}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="3 3"/>`
+      +V.map((r,i)=>{const v=cfg.colV(r),y0=y(0),yv=y(v);return`<rect x="${X(i)-bw/2}" y="${Math.min(yv,y0)}" width="${bw}" height="${Math.max(Math.abs(yv-y0),1)}" rx="2" fill="${v>=0?POS:NEG}" opacity=".6"/>`+(i%k===0?tx(X(i),H-9,r.d.slice(0,5),"middle"):"")}).join("")
+      +cfg.lines.map((l,j)=>hid.has(j)?"":`<polyline fill="none" stroke="${l.c}" stroke-width="${l.w||2.5}" stroke-linejoin="round" stroke-linecap="round" points="${V.map((r,i)=>X(i)+","+y(l.v(r))).join(" ")}"/>`).join("")
+      +tx(L-5,y(hi),sg(hi),"end")+tx(L-5,y(0),"0","end")+tx(L-5,y(lo),sg(lo),"end")+`<g id="hv"></g>`;
+    const rg=el.querySelector(".rg");if(rg)rg.textContent=V[0].d+" to "+V[n-1].d;
+  };
+  const hide=()=>{tip.hidden=true;const g=svg.querySelector("#hv");if(g)g.innerHTML=""};
+  const hover=e=>{
+    const r=svg.getBoundingClientRect(),i=Math.floor(((e.clientX-r.left)/r.width*W-L)/(pw/G.n));
+    if(i<0||i>=G.n){hide();return}
+    const p=rows[a0+i],x=G.X(i);
+    svg.querySelector("#hv").innerHTML=`<line x1="${x}" x2="${x}" y1="${top}" y2="${top+ph}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="4 3"/>`+cfg.lines.map((l,j)=>hid.has(j)?"":`<circle cx="${x}" cy="${G.y(l.v(p))}" r="4.5" fill="${l.c}" stroke="var(--card)" stroke-width="1.5"/>`).join("");
+    tip.innerHTML=`<b>${p.d}</b><dl>${cfg.tip(p).map(t=>`<dt>${esc(t[0])}</dt><dd class="${cl(t[1])}">${sg(t[1])}${t.length>2?" · "+sg(t[2]):""}</dd>`).join("")}</dl>`;
+    tip.hidden=false;const w=el.querySelector(".chw").clientWidth,px=x/W*w;
+    tip.style.left=(px+14+tip.offsetWidth>w?Math.max(0,px-tip.offsetWidth-14):px+14)+"px";
+  };
+  const zoom=(dir,f)=>{const n=b0-a0+1,m=Math.max(Math.min(3,rows.length),Math.min(rows.length,Math.round(n*(dir>0?1.35:0.7)))),c=a0+f*n;a0=Math.max(0,Math.min(rows.length-m,Math.round(c-f*m)));b0=a0+m-1;draw()};
+  svg.addEventListener("wheel",e=>{e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY,Math.min(1,Math.max(0,((e.clientX-r.left)/r.width*W-L)/pw)))},{passive:false});
+  svg.addEventListener("pointerdown",e=>{drag={x:e.clientX,a:a0};svg.setPointerCapture(e.pointerId);hover(e)});
+  svg.addEventListener("pointermove",e=>{if(drag&&e.buttons){const r=svg.getBoundingClientRect(),n=b0-a0+1,s=Math.round(-(e.clientX-drag.x)/(r.width*pw/W/n));a0=Math.max(0,Math.min(rows.length-n,drag.a+s));b0=a0+n-1;draw()}hover(e)});
+  svg.addEventListener("pointerup",()=>{drag=null});
+  svg.addEventListener("pointerleave",hide);
+  svg.addEventListener("dblclick",()=>{a0=0;b0=rows.length-1;draw()});
+  el.querySelectorAll(".zb").forEach(bt=>bt.onclick=()=>{const z=bt.dataset.z;if(z==="all"){a0=0;b0=rows.length-1;draw()}else zoom(z==="in"?-1:1,0.5)});
+  el.querySelectorAll(".lt").forEach(s=>s.onclick=()=>{const i=+s.dataset.i;hid.has(i)?hid.delete(i):hid.add(i);s.classList.toggle("off",hid.has(i));draw()});
+  draw();
+}
+const NL=String.fromCharCode(10);
+function toCsv(rows){return rows.map(r=>r.map(v=>{const s=v==null?"":String(v);return s.includes(",")||s.includes('"')||s.includes(NL)?'"'+s.split('"').join('""')+'"':s}).join(",")).join(NL)}
+const r4=x=>Math.round(x*10000)/10000;
+function exportRows(ex,k){
+  const a=S[ex],H=store();
+  if(k==="days"){const Z=(TD[ex]||{}).Z||[],zm={};Z.forEach((z,i)=>{zm[z.d]={z,p:Z[i-1]||{both:0,hold:0,nw:0}}});
+    return[["Date","Trades","Fees","Closed P&L","Same-day profit","Shares matched","Same-day profit per share","Your result (day)","If not traded (day)","Trading effect (day)","Net worth (day end)"],...a.list.map(x=>{const m=zm[x.d],y=m?m.z.both-m.p.both:"",h=m?m.z.hold-m.p.hold:"";return[x.d,x.n,r4(x.fees),r4(x.real),r4(x.rtp),x.rtq,x.rtq?r4(x.rtp/x.rtq):"",y===""?"":r4(y),h===""?"":r4(h),y===""?"":r4(y-h),m?r4(m.z.nw):""]})]}
+  if(k==="tickers"){const{us,rows}=plRows(a);return[["Date","Ticker","Closed P&L (day)","Closed P&L (total)"],...rows.flatMap(r=>us.map(u=>[r.d,u,r4(r.t[u].day),r4(r.t[u].cum)]))]}
+  if(k==="trades")return ex==="qa"?[["Date","Type","Quantity","Stock","Price","Net amount","Fee"],...R.qa.tr.map(t=>[t.d,t.t,t.q,t.u,t.p,t.net,t.fee])]:[["Date","Kind","Ticker","Quantity","Fee","Amount"],...R.led.tx.map(t=>[t.d,t.k,t.u,t.q,r4(t.fee),t.amt])];
+  if(k==="orders")return[["Execution date","Ticker","Type","Quantity","Gross rate"],...R.ord.map(o=>[o.d,o.u,o.t,o.q,o.p])];
+  if(k==="prices")return[["Ticker","Date","Price"],...Object.entries(H[ex]).flatMap(([u,h])=>h.map(x=>[u,x[0],x[1]]))];
+  const rd=x=>ex==="ps"?Math.ceil(x*100-1e-9)/100:r4(x);
+  return[["Stock","Shares","Avg cost","Price","Unrealised","RTP same day","RTP other day","RTC same day","RTC other day"],...a.open.map(o=>{const h=H[ex][o.u],p=h&&h.length?h[h.length-1][1]:0,ac=ex==="ps"?cu(o.a):r4(o.a);if(!(p>0))return[o.u,o.q,ac,"","","","","",""];return[o.u,o.q,ac,p,r4(o.q*(sellNet(ex,p)-o.a)),rd(sameDay(ex,p)),rd(beSell(ex,o.a)),r4(rd(sameDay(ex,p))-p),r4(rd(beSell(ex,buyCost(ex,p)))-p)]})];
+}
+function backup(){return JSON.stringify({app:"trade-journal",version:1,exported:new Date().toISOString(),R,T,prices:store(),fees:F,log:lsGet("tj.log",[]),ptime:lsGet("tj.ptime",{})},null,1)}
+function restoreFile(f){
+  const err=$("#err");err.hidden=true;
+  f.text().then(t=>{try{const o=JSON.parse(t);if(o.app!=="trade-journal"||!o.R)throw new Error("That isn’t a Trade Journal backup.");for(const k of["qa","led","ord"])if(o.R[k])R[k]=o.R[k];Object.assign(T,o.T||{});Object.assign(F,o.fees||{});lsSet("tj.prices",o.prices||{});lsSet("tj.fees",F);lsSet("tj.log",o.log||[]);lsSet("tj.ptime",o.ptime||{});save();refresh()}catch(e){err.textContent=e.message;err.hidden=false}});
+}
+async function dl(el,name,text){
+  const xm=el.closest(".xcard").querySelector(".xm");
+  try{
+    const d=window.claude&&claude.use?await claude.use("downloads"):null;
+    if(!d){xm.innerHTML="Downloads aren’t available in this view. Copy the text below instead.<textarea readonly rows=\"6\" style=\"width:100%\"></textarea>";xm.querySelector("textarea").value=text;return}
+    await d.save({filename:name,data:text});xm.textContent="Saved "+name+".";
+  }catch(e){xm.textContent=e&&e.code==="declined"?"Download cancelled.":"Couldn’t save: "+((e&&e.message)||"unavailable")}
+}
+const xcard=ex=>`<h3>Export</h3><div class="card xcard"><p class="mut" style="margin-top:0">CSV files open in Excel or Sheets. The full backup holds everything this page keeps in your browser for both exchanges: statements, saved prices, fees and import history. Restoring from a backup replaces all of it.</p>${(ex==="qa"?[["days","Daily summary"],["tickers","Profit and loss per ticker"],["trades","Trades"],["open","Open positions and break-even"],["prices","Price history"]]:[["days","Daily summary"],["tickers","Profit and loss per ticker"],["trades","Account statement lines"],["orders","Order history"],["open","Open positions and break-even"],["prices","Price history"]]).map(x=>`<button class="btn" data-x="${ex}" data-k="${x[0]}">${x[1]} (CSV)</button>`).join(" ")}<br><button class="btn" data-x="${ex}" data-k="all">Full backup (JSON)</button> <label class="btn">Restore from backup<input type="file" accept=".json" data-restore style="display:none"></label><div class="xm mut"></div></div>`;
+const LAST=[];
+function pasteSrc(t,k,box){
+  const pm=$("#pmsg");pm.textContent="";pm.style.color="";
+  try{
+    if(!window.XLSX)throw new Error("The spreadsheet reader didn’t load. Reload the page.");
+    if(!t.trim())throw new Error("Paste the table first.");
+    LAST.length=0;
+    (/<table/i.test(t)?t.split(/(?=<table)/i).filter(x=>/<table/i.test(x)):[t]).forEach(x=>ingest(XLSX.read(x,{type:"string",raw:true}),false));
+    box.value="";
+    const ks=[...new Set(LAST)];pm.style.color="var(--pos)";
+    pm.textContent="Loaded the "+ks.map(x=>KN[x].toLowerCase()).join(" and the ")+(ks.length===1&&ks[0]!==k?". This was in the wrong box, so I read it and put it in the right place.":".");
+  }catch(e){pm.style.color="var(--neg)";pm.textContent=e.message}
+}
+function ltp(ex,u){const L=ex==="ps"?R.ord:R.qa.tr;let b=null;for(const o of L)if(o.u===u&&(!b||key(o.d)>=key(b.d)))b=o;return b?b.p:""}
+let DAYB=lsGet("tj.dayb","stmt");
+function ltv(ex,u,l){const L=ex==="ps"?R.ord:R.qa.tr;let b=null;for(const o of L)if(o.u===u&&(!b||key(o.d)>=key(b.d)))b=o;if(!b)return l?l[1]:"";if(!l)return b.p;return key(b.d)>key(l[0])?b.p:l[1]}
+function cu(x){return(Math.ceil(x*100-1e-9)/100).toFixed(2)}
+async function loadKind(fs,k){for(const f of [...fs]){await load(f)}}
+
+async function load(f){
+  const err=$("#err");err.hidden=true;
+  try{
+    if(!window.XLSX)throw new Error("The spreadsheet reader didn’t load. Check your connection and reload the page.");
+    const bin=/\.xlsx?$/i.test(f.name),wb=bin?XLSX.read(await f.arrayBuffer(),{type:"array"}):XLSX.read(await f.text(),{type:"string",raw:true});
+    ingest(wb,bin);
+    
+  }catch(e){err.textContent=e.message;err.hidden=false}
+}
+const loadAll=fs=>loadKind(fs,"qa");
+$("#file").addEventListener("change",e=>loadAll(e.target.files));
+$("#go").onclick=()=>{const err=$("#err"),t=$("#paste").value;err.hidden=true;try{if(!window.XLSX)throw new Error("The spreadsheet reader didn’t load. Reload the page.");(/<table/i.test(t)?t.split(/(?=<table)/i).filter(x=>/<table/i.test(x)):[t]).forEach(x=>ingest(XLSX.read(x,{type:"string",raw:true}),false))}catch(e){err.textContent=e.message;err.hidden=false}};
+$("#out").addEventListener("click",e=>{const b=e.target.closest("[data-ex]");if(b){S.ex=b.dataset.ex;refresh()}});
+const dz=$("#drop");
+["dragenter","dragover"].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add("on")}));
+["dragleave","drop"].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.remove("on")}));
+dz.addEventListener("drop",e=>loadAll(e.dataTransfer.files));
+[["fq","q"],["fc","c"],["fs","s"],["fd","d"]].forEach(([id,k])=>{$("#"+id).value=F[k];$("#"+id).addEventListener("input",e=>{const v=parseFloat(e.target.value);if(v>=0){F[k]=v;lsSet("tj.fees",F);["qa","ps"].forEach(x=>{const b=$("#bd-"+x);b._c&&b._c()})}})});
+restore();refresh();
+$("#qa-slot").appendChild($("#drop"));$("#paste").closest("details").hidden=true;
+$("#go-led").onclick=()=>pasteSrc($("#pa-led").value,"led",$("#pa-led"));
+$("#go-ord").onclick=()=>pasteSrc($("#pa-ord").value,"ord",$("#pa-ord"));
+$("#mb").onclick=()=>$("#nav").classList.toggle("open");
+$("#out").addEventListener("click",e=>{const b=e.target.closest("[data-day]");if(b){DAYB=b.dataset.day;lsSet("tj.dayb",DAYB);refresh()}});
+$("#out").addEventListener("click",e=>{const b=e.target.closest("[data-x]");if(!b)return;const ex=b.dataset.x,k=b.dataset.k,day=new Date().toISOString().slice(0,10);if(k==="all")return dl(b,"trade-journal-backup-"+day+".json",backup());dl(b,"trade-journal-"+ex+"-"+k+"-"+day+".csv",toCsv(exportRows(ex,k)))});
+$("#out").addEventListener("change",e=>{if(e.target.matches("[data-restore]")&&e.target.files[0]){restoreFile(e.target.files[0]);e.target.value=""}});
+[["fl-led","led"],["fl-ord","ord"]].forEach(([id,k])=>{$("#"+id).onchange=e=>{const el=e.target;loadKind(el.files,k).then(()=>{el.value=""})}});
+["qse","psx"].forEach(x=>{const i=document.querySelector('[data-p="'+x+'-import"]');i.parentElement.prepend(i);$('#nav a[data-v="'+x+'-prices"]').before($('#nav a[data-v="'+x+'-import"]'))});
+addEventListener("hashchange",route);route();
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===e.target.dataset.p))}),{rootMargin:"-10% 0px -80% 0px"});
+document.querySelectorAll("[data-p]").forEach(p=>io.observe(p));
+</script>
+</body>
+</html>
