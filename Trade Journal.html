@@ -297,9 +297,12 @@ const sameDay=(ex,p)=>ex==="ps"?p/(1-kP()):beSell("qa",buyCost("qa",p));
 
 function parseLed(rows){
   const i=rows.findIndex(r=>r.some(c=>/^description$/i.test(String(c).trim())));
-  const h=rows[i].map(c=>String(c).trim().toLowerCase()),c=k=>h.indexOf(k),o={tx:[],dep:0,one:0,dl:[]};
+  const h=rows[i].map(c=>String(c).trim().toLowerCase()),c=k=>h.indexOf(k),o={tx:[],dep:0,one:0,dl:[],cash:null,cashIssues:[],cashRows:0};
   for(const r of rows.slice(i+1)){
     const desc=String(r[c("description")]||""),db=num(r[c("debit")]),cr=num(r[c("credit")]),d=pd(r[c("date")]);
+    const balanceText=String(r[c("balance")]||"");
+    const balanceMatch=balanceText.match(/([\\d,.]+)\\s*\\((Cr|Dr)\\)/i);
+    if(balanceMatch&&desc.toLowerCase()!=="net balance"){const reported=num(balanceMatch[1])*(balanceMatch[2].toLowerCase()==="dr"?-1:1);if(o.cash!==null&&Math.abs((o.cash+cr-db)-reported)>0.03)o.cashIssues.push({d,description:desc.slice(0,80),expected:Math.round((o.cash+cr-db)*100)/100,reported});o.cash=reported;o.cashRows++}
     const m=desc.match(/(Buy|Sell|Difference)\s+(\S+)\s+([\d,.]+)\s*@\s*([\d.]+)/i);
     if(m){let fee=0;desc.replace(/(Comission Charges|Commission Charges|SST on AdvisoryFee|SST|CDC|FIN|PSX|NCSS|NDM|CGT|AdvisoryFee)\s+([\d.]+)/gi,(_,n,v)=>{fee+=+v});
       const k=m[1].toLowerCase();o.tx.push({d,k,u:m[2],q:num(m[3]),rate:+m[4],fee,amt:k==="buy"?db:k==="sell"?cr:cr-db})}
@@ -419,10 +422,14 @@ function refresh(){
 function renderAHLOverview(){
   const host=$("#rp-ps");if(!host||!window.AHLJournal)return;
   const r=AHLJournal.calculate(R.led,R.ord),cur=host.innerHTML;
-  const info=R.led&&T.led?"Imported AHL statement":"Sample / estimated ledger — import your statement to verify P&L";
-  const status=r.matched?"Matched":r.mismatches.length+" quantity mismatches · "+r.issues.length+" accounting warnings";
+  const actual=!!T.led,orderLoaded=!!T.ord,ledger=R.led||{};
+  const info=actual?"Imported AHL account statement":"Demonstration data — import your AHL statement for your own P&L";
+  const status=!actual?"Not verified":!orderLoaded?"Order history needed":r.matched?"Quantity checks passed":r.mismatches.length+" quantity differences · "+r.issues.length+" accounting warnings";
   const table=r.open.map(p=>'<tr><td>'+esc(p.u)+'</td><td>'+fmt(p.q)+'</td><td>'+fmt(p.avgCost,2)+'</td><td>'+fmt(p.cost,2)+'</td></tr>').join("");
-  host.innerHTML='<div class="card"><h2 style="margin-top:0">AHL at a glance</h2><p class="mut">'+esc(info)+'</p><div class="grid"><div><span class="mut">Realized P&amp;L</span><h2 class="'+cl(r.realized)+'">'+sg(r.realized)+' PKR</h2></div><div><span class="mut">Reconciliation</span><h2>'+esc(status)+'</h2></div><div><span class="mut">Open positions</span><h2>'+r.open.length+'</h2></div><div><span class="mut">Duplicate ledger rows</span><h2>'+r.duplicates+'</h2></div></div><p class="note">Weighted-average cost including purchase charges. Unmatched sells are excluded and flagged. Same-day differences are realized cash adjustments. Reconciliation is a quantity check, not a verified cash-balance audit.</p><h3>Open positions</h3><div class="scroll"><table><tr><th>Symbol</th><th>Shares</th><th>Average cost</th><th>Total cost</th></tr>'+table+'</table></div>'+((r.mismatches.length||r.issues.length)?'<details><summary>Review discrepancies</summary><pre style="white-space:pre-wrap">'+esc(JSON.stringify({mismatches:r.mismatches,issues:r.issues},null,2))+'</pre></details>':'')+'</div><details style="margin-top:16px"><summary>Advanced reports and charts</summary>'+cur+'</details>';
+  const stock=Object.entries(r.byStock).sort((a,b)=>b[1]-a[1]).map(([u,v])=>'<tr><td>'+esc(u)+'</td><td class="'+cl(v)+'">'+sg(v)+' PKR</td></tr>').join("");
+  const cash=actual&&Number.isFinite(ledger.cash)?fmt(ledger.cash,2)+' PKR':'Unavailable';
+  const cashIssues=actual?(ledger.cashIssues||[]):[];
+  host.innerHTML='<div class="card"><h2 style="margin-top:0">AHL dashboard</h2><p class="mut">'+esc(info)+'</p><div class="grid"><div><span class="mut">Net realized P&amp;L</span><h2 class="'+cl(r.realized)+'">'+sg(r.realized)+' PKR</h2></div><div><span class="mut">Gross realized P&amp;L</span><h2>Requires fill-level fee allocation</h2></div><div><span class="mut">Trading fees in ledger</span><h2>'+fmt(r.fees,2)+' PKR</h2></div><div><span class="mut">Statement cash balance</span><h2>'+cash+'</h2></div><div><span class="mut">Open positions</span><h2>'+r.open.length+'</h2></div><div><span class="mut">Order reconciliation</span><h2>'+esc(status)+'</h2></div></div><p class="note">Weighted-average net-cost method. Same-day differences are included once as realized settlement adjustments. The gross P&amp;L is deliberately withheld until fills and charges can be allocated without double counting. Statement cash rows checked: '+(ledger.cashRows||0)+'; running-balance warnings: '+cashIssues.length+'. Quantity checks do not establish complete cash or trade reconciliation.</p><h3>Realized P&amp;L by stock</h3><div class="scroll"><table><tr><th>Symbol</th><th>Net P&amp;L</th></tr>'+stock+'</table></div><h3>Open positions</h3><div class="scroll"><table><tr><th>Symbol</th><th>Shares</th><th>Average cost</th><th>Total cost</th></tr>'+table+'</table></div>'+((r.mismatches.length||r.issues.length||cashIssues.length)?'<details><summary>Review discrepancies</summary><pre style="white-space:pre-wrap">'+esc(JSON.stringify({mismatches:r.mismatches,issues:r.issues,cashIssues},null,2))+'</pre></details>':'')+'</div><details style="margin-top:16px"><summary>Advanced reports and charts</summary>'+cur+'</details>';
 }
 function board(ex){
   const a=S[ex],H=store(),PT=lsGet("tj.ptime",{}),el=$("#bd-"+ex);
