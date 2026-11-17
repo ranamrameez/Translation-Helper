@@ -419,26 +419,7 @@ function refresh(){
   let L=R.led,O=R.ord,ext=0;const est=!R.led;
   if(est)L=ledFromOrd(R.ord);else{if(T.led&&!T.ord)O=null;if(O){const ld=L.tx.reduce((m,t)=>key(t.d)>m?key(t.d):m,""),x=ledFromOrd(O.filter(o=>key(o.d)>=ld));ext=x.tx.length>0;L={...L,tx:[...L.tx,...x.tx]}}}
   S.ps=analysePs(L,O);S.ps.est=est;S.ps.ext=ext;
-  ["qa","ps"].forEach(ex=>{render(S[ex]);board(ex)});imports();renderAHLOverview();["qa","ps"].forEach(renderCalculator);document.querySelectorAll("[data-day]").forEach(b=>{b.style.outline=b.dataset.day===DAYB?"2px solid var(--acc)":""});
-}
-function renderCalculator(ex){
- const host=$("#calc-"+ex);if(!host)return;
- const saved=lsGet("tj.calculator."+ex,{});
- const fields=[["symbol","Stock / symbol","text"],["oldQty","Existing shares","number"],["oldAvg","Existing average cost per share","number"],["qty","New buy shares","number"],["price","New buy price per share","number"]];
- const labels=fields.map(([id,label,type])=>'<label style="display:block;margin:8px 0">'+label+'<input style="display:block;width:100%;max-width:320px" data-calc="'+id+'" type="'+type+'" '+(type==="number"?'min="0" step="any" inputmode="decimal"':'')+' value="'+esc(saved[id]??(id==="oldQty"||id==="oldAvg"?"0":""))+'"></label>').join("");
- host.innerHTML='<div class="card"><p class="mut">Independent quick calculator. Enter 0 existing shares for a new position. Existing average cost must include any historical buy charges.</p>'+labels+'<details><summary>Broker fee configuration</summary><p class="mut">These values are shared with the Trade Journal fee settings.</p>'+(ex==="qa"?'<label>The Group fee per side (%) <input data-fee="q" type="number" min="0" step="any" value="'+F.q+'"></label>':'<label>AHL commission (%) <input data-fee="c" type="number" min="0" step="any" value="'+F.c+'"></label><label> Tax on commission (%) <input data-fee="s" type="number" min="0" step="any" value="'+F.s+'"></label><label> CDC per share (PKR) <input data-fee="d" type="number" min="0" step="any" value="'+F.d+'"></label>')+'</details><div data-calc-result aria-live="polite"></div></div>';
- const inputs=()=>Object.fromEntries([...host.querySelectorAll("[data-calc]")].map(e=>[e.dataset.calc,e.value]));
- const update=()=>{const v=inputs();lsSet("tj.calculator."+ex,v);const n=Number(v.qty),p=Number(v.price),oldN=Number(v.oldQty),oldA=Number(v.oldAvg);
- const out=host.querySelector("[data-calc-result]");
- if(![n,p,oldN,oldA].every(Number.isFinite)||n<=0||p<=0||oldN<0||oldA<0||(oldN>0&&oldA===0)){out.innerHTML='<p class="note">Enter a positive new quantity and price. Existing quantity and average cost can both be 0 for a new position.</p>';return}
- const gross=(oldN*oldA+n*p)/(oldN+n),newGross=n*p,charged=n*buyCost(ex,p),buyAvg=buyCost(ex,p),combined=(oldN*oldA+charged)/(oldN+n);
- const rawBE=beSell(ex,combined),tick=tickOf(ex,rawBE),be=Math.ceil((rawBE-1e-10)/tick)*tick;
- const fee=charged-newGross, sellFees=(be-combined)*(oldN+n);
- const money=x=>fmt(x,ex==="qa"?3:2);
- out.innerHTML='<h3>Results'+(v.symbol?' — '+esc(v.symbol):'')+'</h3><div class="grid"><div><span class="mut">New buy gross value</span><h2>'+money(newGross)+'</h2></div><div><span class="mut">New buy fees</span><h2>'+money(fee)+'</h2></div><div><span class="mut">New buy avg after commission</span><h2>'+money(buyAvg)+'</h2></div><div><span class="mut">Gross combined average</span><h2>'+money(gross)+'</h2></div><div><span class="mut">Combined avg after buy commission</span><h2>'+money(combined)+'</h2></div><div><span class="mut">Break-even selling price</span><h2 class="pos">'+money(be)+'</h2></div></div><p class="note">Total shares: '+fmt(oldN+n)+' · New buy total after fees: '+money(charged)+' · BE includes estimated selling charges. '+(ex==="qa"?"QAR":"PKR")+' per share unless stated. Gross combined average uses your existing fee-inclusive average as provided. Break-even is rounded up to the next exchange tick.</p>';
- };
- host.addEventListener("input",e=>{if(e.target.matches("[data-fee]")){const k=e.target.dataset.fee,v=Number(e.target.value);if(Number.isFinite(v)&&v>=0){F[k]=v;lsSet("tj.fees",F);const main=$("#"+({q:"fq",c:"fc",s:"fs",d:"fd"}[k]));if(main)main.value=v}}update()});
- update();
+  ["qa","ps"].forEach(ex=>{render(S[ex]);board(ex)});imports();renderAHLOverview();document.querySelectorAll("[data-day]").forEach(b=>{b.style.outline=b.dataset.day===DAYB?"2px solid var(--acc)":""});
 }
 function renderAHLOverview(){
   const host=$("#rp-ps");if(!host||!window.AHLJournal)return;
@@ -731,5 +712,6 @@ addEventListener("hashchange",route);route();
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===e.target.dataset.p))}),{rootMargin:"-10% 0px -80% 0px"});
 document.querySelectorAll("[data-p]").forEach(p=>io.observe(p));
 </script>
+<script src="./trade-calculators.js"></script>
 </body>
 </html>
