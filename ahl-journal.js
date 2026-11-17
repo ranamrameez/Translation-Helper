@@ -23,10 +23,7 @@ function calculate(ledger,orders){
   }else if(k==="difference"){realizedFees+=fee;realized+=amount;byStock[u]=(byStock[u]||0)+amount;closed.push({d:t.d,u,q,proceeds:amount,basis:0,profit:amount,sameDay:true})}
   else issues.push({type:"unknown-kind",transaction:t});
  }
- // Identical broker rows may be legitimate separate fills. Never silently discard them.\n const orderGroups=new Map();
- for(const o of orders||[]){const k=[dateKey(o.c||o.d),String(o.u).toUpperCase(),String(o.t).toLowerCase()].join("|");orderGroups.set(k,(orderGroups.get(k)||0)+Number(o.q||0))}
- const ledgerGroups=new Map();
- for(const t of transactions){if(t.k==="difference")continue;const k=[dateKey(t.d),String(t.u).toUpperCase(),t.k].join("|");ledgerGroups.set(k,(ledgerGroups.get(k)||0)+Number(t.q||0))}
+ // Identical broker rows may be legitimate fills; do not discard them.
  // AHL nets same-day buys/sells into Difference; compare daily signed net quantities.
  const net=(rows,order)=>{const m=new Map();for(const t of rows){if(t.k==="difference")continue;const k=[dateKey(order?(t.c||t.d):t.d),String(t.u).toUpperCase()].join("|");const sign=(order?t.t:t.k)==="buy"?1:-1;m.set(k,(m.get(k)||0)+sign*Number(t.q))}return m};
  const a=net(orders||[],true),b=net(transactions,false),mismatches=[];
