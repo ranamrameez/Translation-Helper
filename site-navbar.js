@@ -27,7 +27,7 @@ class SiteNavbar extends HTMLElement {
         <a class="brand" href="./">🔗 DigiRash Solutions</a>
         <details><summary>General Tools</summary><ul><li><a href="./">Translation Helper</a></li>
 <li><a href="./Trade%20Journal.html">Trade Journal</a></li>
-<li><a href="./psx-command-deck.html">PSX Command Deck</a></li>
+<li><a href="./psx-command-deck.html">PSX Profile</a></li>
 <li><a href="https://github.com/ranamrameez/DesktopPortal/blob/master/Latest_Release/DesktopPortal.zip">Desktop Portal</a></li>
 <li><a href="https://ranamrameez.github.io/formatly/">Formatly</a></li></ul></details>
         <details><summary>GIS Tools</summary><ul><li><a href="https://github.com/ranamrameez/Feature_Class_Export_Tool">Feature Class Export Tool</a></li>
