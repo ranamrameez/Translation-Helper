@@ -6,17 +6,19 @@ class SiteNavbar extends HTMLElement {
       <style>
         :host { display: block; position: relative; z-index: 30; }
         nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; padding: 9px 16px;
-          background: #fff; color: #212529; color-scheme: light; box-shadow: 0 2px 5px #0002;
+          background: linear-gradient(110deg, #102a2e, #111a30 55%, #211d48); color: #f8fafc;
+          color-scheme: dark; border-bottom: 1px solid #2c3a52; box-shadow: 0 8px 22px #02061766;
           font: 16px/1.5 system-ui, sans-serif; }
         a { color: inherit; text-decoration: none; }
-        .brand { color: #0d6efd; font-size: 20px; white-space: nowrap; }
+        .brand { color: #5eead4; font-weight: 700; font-size: 20px; white-space: nowrap; }
         details { position: relative; }
-        summary { cursor: pointer; padding: 6px 0; color: #495057; }
+        summary { cursor: pointer; padding: 6px 0; color: #cbd5e1; }
         ul { position: absolute; top: 100%; left: 0; list-style: none; min-width: 190px; width: max-content;
           max-width: calc(100vw - 36px); box-sizing: border-box; margin: 0; padding: 6px 0;
-          background: #fff; border: 1px solid #d9dfe5; border-radius: 8px; box-shadow: 0 8px 20px #0002; }
+          background: #0f172a; border: 1px solid #455774; border-radius: 8px; box-shadow: 0 8px 20px #0002; }
         li a { display: block; padding: 6px 14px; }
-        li a:hover, li a:focus-visible, [aria-current="page"] { background: #eaf2ff; color: #084298; }
+        li a:hover, li a:focus-visible, [aria-current="page"] { background: #16453f; color: #a7f3e8; }
+        :focus-visible { outline: 2px solid #7dd3fc; outline-offset: 3px; }
         .tools { margin-left: auto; }
         @media (max-width: 760px) {
           .brand { flex: 1 0 100%; }

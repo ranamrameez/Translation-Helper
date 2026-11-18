@@ -27,7 +27,11 @@ h2 { font-size: 1.1rem; }
 p, small { color: var(--muted); }
 .panel { background: #0f172ae8; border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
 .intro, .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-.intro, .controls.panel { margin-bottom: 18px; }
+.intro, .controls.panel, .fee-guide { margin-bottom: 18px; }
+.fee-guide p { margin-top: 8px; }
+.fee-guide a { color: #7dd3fc; }
+.fee-guide table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .85rem; }
+.fee-guide th, .fee-guide td { padding: 6px; border-bottom: 1px solid var(--border); text-align: left; }
 button, select {
   font: inherit;
   font-size: .88rem;
@@ -107,10 +111,25 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
       <div>
         <h1>PSX Profiler</h1>
         <p>Shariah &amp; Hybrid Terminal · November 2026 snapshot</p>
-        <p>AL Habib · Estimated 0.40% round-trip fee · OGDC &amp; LOTCHEM dividend watch</p>
+        <p>AL Habib · Intraday and multi-day break-even estimates · OGDC &amp; LOTCHEM dividend watch</p>
       </div>
       <button id="open-profile" type="button">Master Trader Profile</button>
     </header>
+    <section class="panel fee-guide" aria-labelledby="fees-title">
+      <h2 id="fees-title">AL Habib fee and break-even guide</h2>
+      <p>Intraday (same-day square-off): brokerage on one leg, plus estimated other charges of 0.03–0.04%. The total is approximately <strong>0.18–0.19%</strong> at PKR 20 and above.</p>
+      <p>Multi-day: brokerage on both legs, plus estimated other charges of 0.06–0.10% combined. The total is approximately <strong>0.36–0.40%</strong> at PKR 20 and above.</p>
+      <p>Brokerage per charged leg is the greater of PKR 0.03 per share and 0.15%. Move estimates use the entry price, round up to PKR 0.01, and exclude capital gains tax and slippage.</p>
+      <table>
+        <thead><tr><th>Entry (PKR)</th><th>Intraday move (PKR)</th><th>Multi-day move (PKR)</th><th>Reference move (PKR)</th></tr></thead>
+        <tbody>
+          <tr><td>20–27</td><td>0.04–0.06</td><td>0.08–0.11</td><td>0.50</td></tr>
+          <tr><td>32–40</td><td>0.06–0.08</td><td>0.12–0.16</td><td>0.10</td></tr>
+        </tbody>
+      </table>
+      <p>Reference moves are your examples. A PKR 0.10 move in the PKR 32–40 band covers the modeled intraday cost, while the estimated multi-day cost is higher.</p>
+      <p><a href="https://ahcml.com/assets/uploads/Normal_AOF.pdf">AL Habib brokerage schedule</a></p>
+    </section>
     <div class="panel controls">
       <label>Group watchlist
         <select id="group">
@@ -134,13 +153,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-GHGL">
       <span class="tile-line"><strong class="ticker">GHGL</strong><strong>PKR 40.35</strong></span>
       <small>Ghani Glass Limited · Shariah</small>
-      <span class="tile-line"><small>52W 27.10–43.80</small><small>BE +PKR 0.16</small></span>
+      <span class="tile-line"><small>52W 27.10–43.80</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.08</small><small>Multi-day +PKR 0.15–0.17</small></span>
       <progress class="range" value="79.34131736526948" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">1. Superb</small><small>Hybrid Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-GHGL" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 40.51 (+PKR 0.16)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 40.43 (+PKR 0.08)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 40.50–40.52 (+PKR 0.15–0.17)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>38.00–44.50</dd>
         <dt>Dividend cycle</dt><dd>3–4×/yr (~9.9% yield)</dd>
         <dt>Debt and risk</dt><dd>Low debt</dd>
@@ -151,13 +172,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-DCR">
       <span class="tile-line"><strong class="ticker">DCR</strong><strong>PKR 39.37</strong></span>
       <small>Dolmen City REIT · Shariah</small>
-      <span class="tile-line"><small>52W 24.50–41.98</small><small>BE +PKR 0.16</small></span>
+      <span class="tile-line"><small>52W 24.50–41.98</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.08</small><small>Multi-day +PKR 0.15–0.16</small></span>
       <progress class="range" value="85.06864988558353" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">1. Superb</small><small>Long Hold</small></span>
     </button>
     <div class="stock-profile" id="stock-DCR" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 39.53 (+PKR 0.16)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 39.45 (+PKR 0.08)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 39.52–39.53 (+PKR 0.15–0.16)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>37.50–42.50</dd>
         <dt>Dividend cycle</dt><dd>Quarterly (~6.8% yield)</dd>
         <dt>Debt and risk</dt><dd>Very low · debt-free REIT</dd>
@@ -168,13 +191,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-OGDC">
       <span class="tile-line"><strong class="ticker">OGDC</strong><strong>PKR 312.73</strong></span>
       <small>Oil & Gas Development Co. · Shariah · Held</small>
-      <span class="tile-line"><small>52W 243.90–352.00</small><small>BE +PKR 1.25</small></span>
+      <span class="tile-line"><small>52W 243.90–352.00</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.57–0.60</small><small>Multi-day +PKR 1.13–1.26</small></span>
       <progress class="range" value="63.67252543940797" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">1. Superb</small><small>Hybrid Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-OGDC" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 313.98 (+PKR 1.25)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 313.30–313.33 (+PKR 0.57–0.60)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 313.86–313.99 (+PKR 1.13–1.26)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>Buy 305–315 · Sell 330–345</dd>
         <dt>Dividend cycle</dt><dd>Quarterly (PKR 18.50)</dd>
         <dt>Debt and risk</dt><dd>Low · cash rich</dd>
@@ -185,13 +210,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-MARI">
       <span class="tile-line"><strong class="ticker">MARI</strong><strong>PKR 730.00</strong></span>
       <small>Mari Energies Limited · Shariah · Held</small>
-      <span class="tile-line"><small>52W 510.00–795.00</small><small>BE +PKR 2.92</small></span>
+      <span class="tile-line"><small>52W 510.00–795.00</small></span>
+      <span class="tile-line"><small>Intraday +PKR 1.32–1.39</small><small>Multi-day +PKR 2.63–2.92</small></span>
       <progress class="range" value="77.19298245614034" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">1. Superb</small><small>Long Hold</small></span>
     </button>
     <div class="stock-profile" id="stock-MARI" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 732.92 (+PKR 2.92)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 731.32–731.39 (+PKR 1.32–1.39)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 732.63–732.92 (+PKR 2.63–2.92)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>705–775</dd>
         <dt>Dividend cycle</dt><dd>Semiannual (Feb / Aug)</dd>
         <dt>Debt and risk</dt><dd>Low · virtually debt-free</dd>
@@ -203,13 +230,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-FCCL">
       <span class="tile-line"><strong class="ticker">FCCL</strong><strong>PKR 59.22</strong></span>
       <small>Fauji Cement Company Ltd. · Shariah</small>
-      <span class="tile-line"><small>52W 41.20–64.50</small><small>BE +PKR 0.24</small></span>
+      <span class="tile-line"><small>52W 41.20–64.50</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.11–0.12</small><small>Multi-day +PKR 0.22–0.24</small></span>
       <progress class="range" value="77.3390557939914" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">2. Price Grower / Low Dividend</small><small>Hybrid Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-FCCL" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 59.46 (+PKR 0.24)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 59.33–59.34 (+PKR 0.11–0.12)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 59.44–59.46 (+PKR 0.22–0.24)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>56.50–63.00</dd>
         <dt>Dividend cycle</dt><dd>Annual (Sep / Oct)</dd>
         <dt>Debt and risk</dt><dd>Low to moderate · early debt repayment</dd>
@@ -220,13 +249,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-ILP">
       <span class="tile-line"><strong class="ticker">ILP</strong><strong>PKR 101.58</strong></span>
       <small>Interloop Limited · Shariah</small>
-      <span class="tile-line"><small>52W 68.00–108.90</small><small>BE +PKR 0.41</small></span>
+      <span class="tile-line"><small>52W 68.00–108.90</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.19–0.20</small><small>Multi-day +PKR 0.37–0.41</small></span>
       <progress class="range" value="82.10268948655255" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">2. Price Grower / Low Dividend</small><small>Hybrid Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-ILP" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 101.99 (+PKR 0.41)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 101.77–101.78 (+PKR 0.19–0.20)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 101.95–101.99 (+PKR 0.37–0.41)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>96.00–108.00</dd>
         <dt>Dividend cycle</dt><dd>Semiannual (~3.9% yield)</dd>
         <dt>Debt and risk</dt><dd>Low to moderate</dd>
@@ -238,13 +269,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-LOTCHEM">
       <span class="tile-line"><strong class="ticker">LOTCHEM</strong><strong>PKR 24.65</strong></span>
       <small>Noventra Limited (Lotte Chem) · Shariah</small>
-      <span class="tile-line"><small>52W 18.41–34.30</small><small>BE +PKR 0.10</small></span>
+      <span class="tile-line"><small>52W 18.41–34.30</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.05</small><small>Multi-day +PKR 0.09–0.10</small></span>
       <progress class="range" value="39.26998112020138" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">3. Cyclical / Event Dividend</small><small>Intraday / Short Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-LOTCHEM" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 24.75 (+PKR 0.10)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 24.70 (+PKR 0.05)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 24.74–24.75 (+PKR 0.09–0.10)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>23.40–27.50</dd>
         <dt>Dividend cycle</dt><dd>Irregular (PKR 6.50 in CY26)</dd>
         <dt>Debt and risk</dt><dd>Moderate to high</dd>
@@ -256,13 +289,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-PRL">
       <span class="tile-line"><strong class="ticker">PRL</strong><strong>PKR 82.36</strong></span>
       <small>Pakistan Refinery Limited · Shariah</small>
-      <span class="tile-line"><small>52W 52.00–91.40</small><small>BE +PKR 0.33</small></span>
+      <span class="tile-line"><small>52W 52.00–91.40</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.15–0.16</small><small>Multi-day +PKR 0.30–0.33</small></span>
       <progress class="range" value="77.05583756345177" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">4. Non-Dividend Liquid</small><small>Intraday / Short Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-PRL" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 82.69 (+PKR 0.33)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 82.51–82.52 (+PKR 0.15–0.16)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 82.66–82.69 (+PKR 0.30–0.33)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>78.50–86.00</dd>
         <dt>Dividend cycle</dt><dd>None / rare</dd>
         <dt>Debt and risk</dt><dd>Moderate · capex cycle</dd>
@@ -273,13 +308,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-SEARL">
       <span class="tile-line"><strong class="ticker">SEARL</strong><strong>PKR 79.18</strong></span>
       <small>The Searle Company Ltd. · Shariah</small>
-      <span class="tile-line"><small>52W 58.20–88.50</small><small>BE +PKR 0.32</small></span>
+      <span class="tile-line"><small>52W 58.20–88.50</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.15–0.16</small><small>Multi-day +PKR 0.29–0.32</small></span>
       <progress class="range" value="69.24092409240926" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">4. Non-Dividend Liquid</small><small>Intraday / Short Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-SEARL" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 79.50 (+PKR 0.32)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 79.33–79.34 (+PKR 0.15–0.16)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 79.47–79.50 (+PKR 0.29–0.32)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>76.50–82.50</dd>
         <dt>Dividend cycle</dt><dd>None / bonus-focused</dd>
         <dt>Debt and risk</dt><dd>Moderate · deleveraging</dd>
@@ -291,13 +328,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-TREET">
       <span class="tile-line"><strong class="ticker">TREET</strong><strong>PKR 26.13</strong></span>
       <small>Treet Corporation Limited · Shariah</small>
-      <span class="tile-line"><small>52W 19.55–37.00</small><small>BE +PKR 0.10</small></span>
+      <span class="tile-line"><small>52W 19.55–37.00</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.05</small><small>Multi-day +PKR 0.10–0.11</small></span>
       <progress class="range" value="37.707736389684804" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">5. Caution Daily Only</small><small>Intraday / Short Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-TREET" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 26.23 (+PKR 0.10)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 26.18 (+PKR 0.05)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 26.23–26.24 (+PKR 0.10–0.11)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>25.20–27.40</dd>
         <dt>Dividend cycle</dt><dd>None</dd>
         <dt>Debt and risk</dt><dd>High short-term debt</dd>
@@ -308,13 +347,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-PAEL">
       <span class="tile-line"><strong class="ticker">PAEL</strong><strong>PKR 34.88</strong></span>
       <small>Pak Elektron Limited</small>
-      <span class="tile-line"><small>52W 31.50–64.60</small><small>BE +PKR 0.14</small></span>
+      <span class="tile-line"><small>52W 31.50–64.60</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.07</small><small>Multi-day +PKR 0.13–0.14</small></span>
       <progress class="range" value="10.211480362537774" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">5. Caution Daily Only</small><small>Intraday / Short Swing</small></span>
     </button>
     <div class="stock-profile" id="stock-PAEL" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 35.02 (+PKR 0.14)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 34.95 (+PKR 0.07)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 35.01–35.02 (+PKR 0.13–0.14)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>Support 33.50 · Resistance 36.50</dd>
         <dt>Dividend cycle</dt><dd>None</dd>
         <dt>Debt and risk</dt><dd>High working-capital debt</dd>
@@ -326,13 +367,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-HUMNL">
       <span class="tile-line"><strong class="ticker">HUMNL</strong><strong>PKR 7.99</strong></span>
       <small>Hum Network Limited · Held</small>
-      <span class="tile-line"><small>52W 7.91–17.10</small><small>BE +PKR 0.03</small></span>
+      <span class="tile-line"><small>52W 7.91–17.10</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.04</small><small>Multi-day +PKR 0.07</small></span>
       <progress class="range" value="0.87051142546246" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">Red Zone / Exit-Only</small><small>Exit-Only</small></span>
     </button>
     <div class="stock-profile" id="stock-HUMNL" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 8.02 (+PKR 0.03)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 8.03 (+PKR 0.04)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 8.06 (+PKR 0.07)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>GTC exit 8.55–8.65</dd>
         <dt>Dividend cycle</dt><dd>At risk · Q1 FY27 loss</dd>
         <dt>Debt and risk</dt><dd>Severe · earnings decline</dd>
@@ -343,13 +386,15 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-SSGC">
       <span class="tile-line"><strong class="ticker">SSGC</strong><strong>PKR 23.51</strong></span>
       <small>Sui Southern Gas Co. · Shariah</small>
-      <span class="tile-line"><small>52W 18.20–39.80</small><small>BE +PKR 0.09</small></span>
+      <span class="tile-line"><small>52W 18.20–39.80</small></span>
+      <span class="tile-line"><small>Intraday +PKR 0.05</small><small>Multi-day +PKR 0.09–0.10</small></span>
       <progress class="range" value="24.583333333333346" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">Red Zone / Exit-Only</small><small>Exit-Only</small></span>
     </button>
     <div class="stock-profile" id="stock-SSGC" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR 23.60 (+PKR 0.09)</dd>
+        <dt>Intraday break-even sell price</dt><dd>PKR 23.56 (+PKR 0.05)</dd>
+        <dt>Multi-day break-even sell price</dt><dd>PKR 23.60–23.61 (+PKR 0.09–0.10)</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>Avoid new allocation</dd>
         <dt>Dividend cycle</dt><dd>None</dd>
         <dt>Debt and risk</dt><dd>Extreme · PKR 935.7B liabilities in the supplied profile</dd>
@@ -459,7 +504,8 @@ const healthTiers = [
   { label: 'Red Zone / Exit-Only', zone: 'red', rule: 'Avoid new positions in heavily indebted, declining, or illiquid stocks.' },
 ];
 const tradeGroups = ['Long Hold', 'Hybrid Swing', 'Intraday / Short Swing', 'Exit-Only'];
-const fee = 0.004;
+const commissionPerLeg = price => Math.max(0.03, price * 0.0015);
+const feeRates = { intraday: [1, 0.0003, 0.0004], multiDay: [2, 0.0006, 0.001] };
 
 const stocks = [
   ['GHGL', 'Ghani Glass Limited', 40.35, 27.10, 43.80, 0, 1, true, '38.00–44.50', '3–4×/yr (~9.9% yield)', 'Low debt', 'Glass producer with +57% Q1 FY27 profit in the supplied snapshot.'],
@@ -491,7 +537,14 @@ const returns = {
 };
 const money = new Intl.NumberFormat('en-PK', { maximumFractionDigits: 0 });
 const priceText = price => price.toFixed(2);
-const breakEven = stock => priceText(stock.price * fee);
+function breakEven(price, [legs, minOther, maxOther]) {
+  const commission = legs * commissionPerLeg(price);
+  const roundUp = cost => Math.ceil(cost * 100 - 1e-8) / 100;
+  return [roundUp(commission + price * minOther), roundUp(commission + price * maxOther)];
+}
+const rangeText = ([low, high]) => low === high ? priceText(low) : `${priceText(low)}–${priceText(high)}`;
+const moveText = (price, rates) => `+PKR ${rangeText(breakEven(price, rates))}`;
+const exitText = (price, rates) => `PKR ${rangeText(breakEven(price, rates).map(move => price + move))} (${moveText(price, rates)})`;
 const priceTier = price => {
   if (price < 35) return 'Sub-PKR 35';
   if (price <= 105) return 'PKR 35–105';
@@ -549,13 +602,15 @@ function createTile(stock) {
     <button class="tile-button" type="button" aria-expanded="false" aria-controls="stock-${stock.ticker}">
       <span class="tile-line"><strong class="ticker">${stock.ticker}</strong><strong>PKR ${priceText(stock.price)}</strong></span>
       <small>${stock.name}${stock.shariah ? ' · Shariah' : ''}${stock.held ? ' · Held' : ''}</small>
-      <span class="tile-line"><small>52W ${priceText(stock.low)}–${priceText(stock.high)}</small><small>BE +PKR ${breakEven(stock)}</small></span>
+      <span class="tile-line"><small>52W ${priceText(stock.low)}–${priceText(stock.high)}</small></span>
+      <span class="tile-line"><small>Intraday ${moveText(stock.price, feeRates.intraday)}</small><small>Multi-day ${moveText(stock.price, feeRates.multiDay)}</small></span>
       <progress class="range" value="${range}" max="100" aria-label="Position in 52-week range"></progress>
       <span class="tile-line"><small class="health">${tier.label}</small><small>${tradeGroups[stock.trade]}</small></span>
     </button>
     <div class="stock-profile" id="stock-${stock.ticker}" hidden>
       <dl>
-        <dt>Estimated round-trip breakeven</dt><dd>PKR ${priceText(stock.price * (1 + fee))} (+PKR ${breakEven(stock)})</dd>
+        <dt>Intraday break-even sell price</dt><dd>${exitText(stock.price, feeRates.intraday)}</dd>
+        <dt>Multi-day break-even sell price</dt><dd>${exitText(stock.price, feeRates.multiDay)}</dd>
         <dt>Fair buy / sell range (PKR)</dt><dd>${stock.fair}</dd>
         <dt>Dividend cycle</dt><dd>${stock.dividends}</dd>
         <dt>Debt and risk</dt><dd>${stock.risk}</dd>
@@ -626,12 +681,12 @@ const profileText = document.querySelector('#profile-text');
 const copyStatus = document.querySelector('#copy-status');
 profileText.value = [
   'MY PSX MASTER TRADING PROFILE, HEALTH SCALE & WATCHLIST (November 2026 snapshot)',
-  'Broker and fees: AL Habib Capital Markets. Planning estimate 0.37%–0.40% round trip, with 0.15% per side or PKR 0.03/share plus taxes and levies. Same-day commission treatment may differ. Verify the current broker tariff and tax treatment. Profile assumption: active filer, 15% dividend withholding and 15% CGT.',
+  'Broker and fees: AL Habib Capital Markets. Brokerage per charged leg is the greater of 0.15% and PKR 0.03/share. One leg intraday and two legs multi-day. Estimated total at PKR 20 and above: 0.18–0.19% intraday and 0.36–0.40% multi-day. Verify the current broker tariff and tax treatment. Profile assumption: active filer, 15% dividend withholding and 15% CGT.',
   'Trading approach: Prefer sub-PKR 105 stocks for intraday setups where the expected move exceeds costs.',
   'Health tiers:',
   ...healthTiers.map(tier => `${tier.label}: ${tier.rule}`),
   'Watchlist and positions:',
-  ...stocks.map(stock => `${stock.ticker} · ${healthTiers[stock.health].label} · ${tradeGroups[stock.trade]} · PKR ${priceText(stock.price)} · +PKR ${breakEven(stock)} fee estimate. Range: ${stock.fair}. Dividends: ${stock.dividends}. Risk: ${stock.risk}. ${stock.note}`),
+  ...stocks.map(stock => `${stock.ticker} · ${healthTiers[stock.health].label} · ${tradeGroups[stock.trade]} · PKR ${priceText(stock.price)} · Break-even move intraday ${moveText(stock.price, feeRates.intraday)} and multi-day ${moveText(stock.price, feeRates.multiDay)}. Range: ${stock.fair}. Dividends: ${stock.dividends}. Risk: ${stock.risk}. ${stock.note}`),
   'Additional red-zone names: BIPL and EPQL.',
   'Dividend watch: OGDC and LOTCHEM. Track dividend announcements, ex-dividend dates, and 10-day advance purchase reminders.',
   'Research directive: Refresh the watchlist and surface new research on healthy Shariah PSX stocks.',
