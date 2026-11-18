@@ -10,15 +10,16 @@
 :root[data-theme="dark"]{--bg:#0f1418;--card:#171e24;--ink:#e6ecf1;--mut:#93a1ad;--line:#27313a;--pos:#4cc07a;--neg:#ef7a70;--acc:#5bc0cc;color-scheme:dark}
 html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
+site-navbar{position:sticky;top:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
 main{max-width:760px;margin:0 auto;padding:56px 16px 48px}
-#nav{position:fixed;inset:0 auto 0 0;width:250px;background:var(--card);border-right:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top,0px)) 12px 16px;overflow-y:auto;transform:translateX(-100%);transition:transform .2s;z-index:20}
+#nav{position:fixed;inset:var(--site-nav-bottom,60px) auto 0 0;width:250px;background:var(--card);border-right:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top,0px)) 12px 16px;overflow-y:auto;transform:translateX(-100%);transition:transform .2s;z-index:20}
 #nav.open{transform:none}
 #nav a{display:block;padding:7px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:14px}
 #nav a.k{padding-left:24px;color:var(--mut)}
 #nav a.p{font-weight:700;margin-top:12px}
 #nav a.on{background:var(--bg);color:var(--acc)}
-#mb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:8px;z-index:21;margin:0}
+#mb{position:fixed;top:calc(var(--site-nav-bottom,60px) + 8px);left:8px;z-index:21;margin:0}
 @media (min-width:900px){#nav{transform:none}#mb{display:none}main{margin:0 0 0 250px;max-width:920px;padding-top:20px}}
 .row{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;margin:8px 0}
 .pill{font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mut);white-space:nowrap}.pill.ok{border-color:var(--pos);color:var(--pos)}
@@ -56,11 +57,12 @@ th{font-weight:600;color:var(--mut);font-size:13px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="./ahl-journal.js"></script>
+<script src="./site-navbar.js" defer></script>
 </head>
 <body>
-<button id="mb" class="btn" aria-label="Menu">Menu</button>
-<nav id="nav"><b>Trade Journal</b>
-<a href="./index.html">← Translation Helper</a>
+<site-navbar page="journal"></site-navbar>
+<button id="mb" class="btn" aria-label="Journal sections">Sections</button>
+<nav id="nav" aria-label="Trade Journal sections"><b>Trade Journal</b>
 <a href="#overview" data-v="overview">Top of page</a>
 <a class="p" href="#qse" data-v="qse">QSE - The Group</a>
 <a class="k" href="#qse-calculator" data-v="qse-calculator">Buy &amp; BE calculator</a>
@@ -93,6 +95,10 @@ th{font-weight:600;color:var(--mut);font-size:13px}
 </main>
 <script>
 const $=s=>document.querySelector(s);
+const siteNav = $("site-navbar");
+new ResizeObserver(() => {
+  document.body.style.setProperty("--site-nav-bottom", `${Math.round(siteNav.getBoundingClientRect().bottom)}px`);
+}).observe(siteNav);
 const fmt=(n,d=0)=>(n<0&&Math.round(Math.abs(n)*10**d)>0?"−":"")+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
 const sg=n=>(n>0.5?"+":"")+fmt(n);
 const cl=n=>n>0.5?"pos":n<-0.5?"neg":"";
