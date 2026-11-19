@@ -30,8 +30,20 @@ p, small { color: var(--muted); }
 .intro, .controls.panel, .fee-guide { margin-bottom: 18px; }
 .fee-guide p { margin-top: 8px; }
 .fee-guide a { color: #7dd3fc; }
-.fee-guide table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .85rem; }
-.fee-guide th, .fee-guide td { padding: 6px; border-bottom: 1px solid var(--border); text-align: left; }
+.fee-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 12px; margin-top: 14px; align-items: start; }
+.fee-band { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #111b30; }
+.fee-band h3 { margin: 0; font-size: 1rem; }
+.fee-band label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.fee-band input[type="number"] { width: 8ch; color: inherit; background: #060913; border: 1px solid #455774; border-radius: 6px; padding: 4px; font: inherit; }
+.fee-band input[type="range"] { width: 100%; margin: 10px 0 0; accent-color: #5eead4; cursor: pointer; }
+.fee-ticks { display: block; position: relative; height: 8px; margin-inline: 8px; color: #7dd3fc; }
+.fee-ticks i { position: absolute; height: 7px; border-left: 1px solid currentColor; }
+.fee-endpoints { display: flex; justify-content: space-between; }
+.fee-result { display: block; margin: 8px 0; font-size: .88rem; }
+.fee-result span { display: block; }
+.fee-band summary { cursor: pointer; color: #7dd3fc; }
+.fee-breakpoints { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 4px; max-height: 16rem; overflow: auto; }
+.fee-breakpoints button { width: 100%; text-align: left; font-size: .79rem; }
 button, select {
   font: inherit;
   font-size: .88rem;
@@ -120,14 +132,8 @@ textarea { width: 100%; height: min(50vh, 380px); resize: vertical; margin: 12px
       <p>Intraday (same-day square-off): brokerage on one leg, plus estimated other charges of 0.03–0.04%. The total is approximately <strong>0.18–0.19%</strong> at PKR 20 and above.</p>
       <p>Multi-day: brokerage on both legs, plus estimated other charges of 0.06–0.10% combined. The total is approximately <strong>0.36–0.40%</strong> at PKR 20 and above.</p>
       <p>Brokerage per charged leg is the greater of PKR 0.03 per share and 0.15%. Move estimates use the entry price, round up to PKR 0.01, and exclude capital gains tax and slippage.</p>
-      <table>
-        <thead><tr><th>Entry (PKR)</th><th>Intraday move (PKR)</th><th>Multi-day move (PKR)</th><th>Reference move (PKR)</th></tr></thead>
-        <tbody>
-          <tr><td>20–27</td><td>0.04–0.06</td><td>0.08–0.11</td><td>0.50</td></tr>
-          <tr><td>32–40</td><td>0.06–0.08</td><td>0.12–0.16</td><td>0.10</td></tr>
-        </tbody>
-      </table>
-      <p>Reference moves are your examples. A PKR 0.10 move in the PKR 32–40 band covers the modeled intraday cost, while the estimated multi-day cost is higher.</p>
+      <p>Drag a slider or enter a price to test it. Each tick marks the first price where either end of the intraday estimate changes. Expand the tick labels to jump to an exact price.</p>
+      <div id="fee-bars" class="fee-bars"></div>
       <p><a href="https://ahcml.com/assets/uploads/Normal_AOF.pdf">AL Habib brokerage schedule</a></p>
     </section>
     <div class="panel controls">
@@ -545,6 +551,74 @@ function breakEven(price, [legs, minOther, maxOther]) {
 const rangeText = ([low, high]) => low === high ? priceText(low) : `${priceText(low)}–${priceText(high)}`;
 const moveText = (price, rates) => `+PKR ${rangeText(breakEven(price, rates))}`;
 const exitText = (price, rates) => `PKR ${rangeText(breakEven(price, rates).map(move => price + move))} (${moveText(price, rates)})`;
+// Band limits are in paisa so adjacent bands cover every PKR 0.01 step exactly once.
+const feeBandEnds = [5000, ...Array.from({ length: 15 }, (_, index) => (index + 1) * 10000)];
+
+function intradayBreakpoints(start, end) {
+  const points = [];
+  let [previousLow, previousHigh] = breakEven((start - 1) / 100, feeRates.intraday);
+  for (let cents = start; cents <= end; cents++) {
+    const [low, high] = breakEven(cents / 100, feeRates.intraday);
+    if (cents === 1 || low !== previousLow || high !== previousHigh) points.push(cents);
+    previousLow = low;
+    previousHigh = high;
+  }
+  return points;
+}
+
+function createFeeBand(start, end) {
+  const band = document.createElement('section');
+  band.className = 'fee-band';
+  const name = `PKR ${priceText(start / 100)}–${priceText(end / 100)}`;
+  const points = intradayBreakpoints(start, end);
+  band.innerHTML = `
+    <h3>${name}</h3>
+    <label>Entry price (PKR)
+      <input type="number" min="${start / 100}" max="${end / 100}" step="0.01" value="${priceText(start / 100)}">
+    </label>
+    <input type="range" min="${start}" max="${end}" step="1" value="${start}" aria-label="Entry price, ${name}">
+    <span class="fee-ticks" aria-hidden="true">${points.map(cents =>
+      `<i style="left:${(cents - start) / (end - start) * 100}%"></i>`).join('')}</span>
+    <div class="fee-endpoints"><small>${priceText(start / 100)}</small><small>${priceText(end / 100)}</small></div>
+    <output class="fee-result"></output>
+    <details>
+      <summary>Intraday tick labels (${points.length})</summary>
+      <ul class="fee-breakpoints">${points.map(cents => `
+        <li><button type="button" data-price="${cents}">PKR ${priceText(cents / 100)} · ${moveText(cents / 100, feeRates.intraday)}</button></li>`).join('')}
+      </ul>
+    </details>`;
+  const slider = band.querySelector('input[type="range"]');
+  const entry = band.querySelector('input[type="number"]');
+  const result = band.querySelector('output');
+
+  function update(cents, syncEntry = true) {
+    const price = cents / 100;
+    slider.value = cents;
+    slider.setAttribute('aria-valuetext', `PKR ${priceText(price)}`);
+    if (syncEntry) entry.value = priceText(price);
+    result.innerHTML = `<span>Intraday sell price · <strong>${exitText(price, feeRates.intraday)}</strong></span>
+      <span>Multi-day sell price · <strong>${exitText(price, feeRates.multiDay)}</strong></span>`;
+  }
+
+  slider.addEventListener('input', () => update(Number(slider.value)));
+  entry.addEventListener('input', () => {
+    if (entry.value && entry.validity.valid) update(Math.round(entry.valueAsNumber * 100), false);
+  });
+  entry.addEventListener('change', () => {
+    const value = entry.valueAsNumber;
+    update(Number.isFinite(value) ? Math.min(end, Math.max(start, Math.round(value * 100))) : Number(slider.value));
+  });
+  band.querySelector('.fee-breakpoints').addEventListener('click', event => {
+    const point = event.target.closest('button[data-price]');
+    if (point) update(Number(point.dataset.price));
+  });
+  update(start);
+  return band;
+}
+
+const feeBars = document.querySelector('#fee-bars');
+feeBars.append(...feeBandEnds.map((end, index) => createFeeBand((feeBandEnds[index - 1] ?? 0) + 1, end)));
+
 const priceTier = price => {
   if (price < 35) return 'Sub-PKR 35';
   if (price <= 105) return 'PKR 35–105';
